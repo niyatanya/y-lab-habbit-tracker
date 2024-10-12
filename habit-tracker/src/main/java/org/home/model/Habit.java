@@ -47,16 +47,4 @@ public class Habit {
     public List<HabitRecord> getCompletionHistory() {
         return habitRecords;
     }
-
-//    public void editHabit(String title, String newTitle, String newDescription, Frequency newFrequency) {
-//        Habit habitToEdit = findHabitByTitle(title);
-//        if (habitToEdit != null) {
-//            habitToEdit.setTitle(newTitle);
-//            habitToEdit.setDescription(newDescription);
-//            habitToEdit.setFrequency(newFrequency);
-//            System.out.println("Habit updated: " + newTitle);
-//        } else {
-//            System.out.println("Habit not found: " + title);
-//        }
-//    }
 }
