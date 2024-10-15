@@ -59,7 +59,6 @@ public class UserService {
                 .orElse(null);
     }
 
-    // Метод для получения всех пользователей (для администрирования, опционально)
     public List<User> getAllUsers() {
         return users;
     }
