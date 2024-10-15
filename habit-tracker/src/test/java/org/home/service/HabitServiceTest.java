@@ -5,6 +5,7 @@ import org.home.model.Habit;
 import org.home.model.HabitRecord;
 import org.home.model.User;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -12,6 +13,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@DisplayName("HabitService test")
 class HabitServiceTest {
 
     private HabitService habitService;
@@ -24,6 +26,7 @@ class HabitServiceTest {
     }
 
     @Test
+    @DisplayName("Create habit")
     void testCreateHabit() {
         String title = "Read a book";
         String description = "Read every day for 30 minutes";
@@ -38,6 +41,7 @@ class HabitServiceTest {
     }
 
     @Test
+    @DisplayName("Edit habit")
     void testEditHabit() {
         String oldTitle = "Read a book";
         String newTitle = "Read a novel";
@@ -54,6 +58,7 @@ class HabitServiceTest {
     }
 
     @Test
+    @DisplayName("Delete habit")
     void testDeleteHabit() {
         String title = "Read a book";
         Habit habit = habitService.createHabit(user, title, "Description", Frequency.DAILY);
@@ -64,6 +69,7 @@ class HabitServiceTest {
     }
 
     @Test
+    @DisplayName("Get all habits")
     void testGetAllHabits() {
         Habit habit1 = habitService.createHabit(user, "Read", "Read daily", Frequency.DAILY);
         Habit habit2 = habitService.createHabit(user, "Exercise", "Exercise weekly", Frequency.WEEKLY);
@@ -75,6 +81,7 @@ class HabitServiceTest {
     }
 
     @Test
+    @DisplayName("Track a habit")
     void testTrackHabit() {
         String title = "Read a book";
         LocalDate date = LocalDate.now();
@@ -89,6 +96,7 @@ class HabitServiceTest {
     }
 
     @Test
+    @DisplayName("Find habit by title with existing title")
     void testFindHabitByTitle_Found() {
         String title = "Read a book";
         Habit habit = habitService.createHabit(user, title, "Read daily", Frequency.DAILY);
@@ -100,6 +108,7 @@ class HabitServiceTest {
     }
 
     @Test
+    @DisplayName("Find habit by title with non-existing title")
     void testFindHabitByTitle_NotFound() {
         String title = "Non-existing habit";
 

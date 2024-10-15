@@ -2,10 +2,12 @@ package org.home.service;
 
 import org.home.model.User;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@DisplayName("UserService test")
 class UserServiceTest {
 
     private UserService userService;
@@ -16,6 +18,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("Register new user with correct credentials")
     void shouldRegisterNewUserSuccessfully() {
         User user = userService.register("John Doe", "john@example.com", "password123");
 
@@ -27,6 +30,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("Fail to register new user with duplicate email")
     void shouldNotRegisterUserWithDuplicateEmail() {
         userService.register("John Doe", "john@example.com", "password123");
 
@@ -37,6 +41,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("Login user with correct credentials")
     void shouldLoginUserSuccessfully() {
         userService.register("John Doe", "john@example.com", "password123");
 
@@ -48,6 +53,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("Fail to login a user with incorrect password")
     void shouldNotLoginWithIncorrectPassword() {
         userService.register("John Doe", "john@example.com", "password123");
 
@@ -57,6 +63,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("Edit user profile with valid data")
     void shouldEditProfileSuccessfully() {
         User user = userService.register("John Doe", "john@example.com", "password123");
 
@@ -68,6 +75,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("Edit user profile with existing email")
     void shouldNotEditProfileWithExistingEmail() {
         User user1 = userService.register("John Doe", "john@example.com", "password123");
         userService.register("Jane Smith", "jane@example.com", "password456");
@@ -78,6 +86,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("Delete user")
     void shouldDeleteUserSuccessfully() {
         User user = userService.register("John Doe", "john@example.com", "password123");
 
