@@ -5,7 +5,6 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -19,32 +18,5 @@ public class Habit {
         this.title = title;
         this.description = description;
         this.frequency = frequency;
-    }
-
-    public void editHabit(String newTitle, String newDescription, Frequency newFrequency) {
-        this.title = newTitle;
-        this.description = newDescription;
-        this.frequency = newFrequency;
-    }
-
-    public void trackCompletion(LocalDate date, boolean completed) {
-        HabitRecord record = findRecordByDate(date);
-        if (record == null) {
-            record = new HabitRecord(date, completed);
-            habitRecords.add(record);
-        } else {
-            record.setCompleted(completed);
-        }
-    }
-
-    private HabitRecord findRecordByDate(LocalDate date) {
-        return habitRecords.stream()
-                .filter(record -> record.getDate().equals(date))
-                .findFirst()
-                .orElse(null);
-    }
-
-    public List<HabitRecord> getCompletionHistory() {
-        return habitRecords;
     }
 }

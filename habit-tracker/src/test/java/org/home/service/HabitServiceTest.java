@@ -37,7 +37,7 @@ class HabitServiceTest {
         assertThat(createdHabit.getTitle()).isEqualTo(title);
         assertThat(createdHabit.getDescription()).isEqualTo(description);
         assertThat(createdHabit.getFrequency()).isEqualTo(frequency);
-        assertThat(user.getAllHabits()).contains(createdHabit);
+        assertThat(user.getHabits()).contains(createdHabit);
     }
 
     @Test
@@ -65,7 +65,7 @@ class HabitServiceTest {
 
         habitService.deleteHabit(user, title);
 
-        assertThat(user.getAllHabits()).doesNotContain(habit);
+        assertThat(user.getHabits()).doesNotContain(habit);
     }
 
     @Test
@@ -74,7 +74,7 @@ class HabitServiceTest {
         Habit habit1 = habitService.createHabit(user, "Read", "Read daily", Frequency.DAILY);
         Habit habit2 = habitService.createHabit(user, "Exercise", "Exercise weekly", Frequency.WEEKLY);
 
-        List<Habit> habits = habitService.getAllHabits(user);
+        List<Habit> habits = user.getHabits();
 
         assertThat(habits).hasSize(2);
         assertThat(habits).contains(habit1, habit2);
@@ -92,7 +92,7 @@ class HabitServiceTest {
         habitService.trackHabit(user, title, date, completed);
 
         HabitRecord record = new HabitRecord(date, completed);
-        assertThat(habit.getCompletionHistory()).contains(record);
+        assertThat(habit.getHabitRecords()).contains(record);
     }
 
     @Test

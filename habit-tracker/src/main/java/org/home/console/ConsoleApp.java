@@ -148,7 +148,7 @@ public class ConsoleApp {
     }
 
     private static void viewAllHabits() {
-        var habits = habitService.getAllHabits(currentUser);
+        var habits = currentUser.getHabits();
         if (habits.isEmpty()) {
             System.out.println("You have no habits yet.");
         } else {

@@ -22,7 +22,7 @@ public class StatisticsService {
             return 0;
         }
 
-        List<HabitRecord> completions = habit.getCompletionHistory();
+        List<HabitRecord> completions = habit.getHabitRecords();
         if (completions.isEmpty()) {
             return 0;
         }
@@ -106,14 +106,14 @@ public class StatisticsService {
     }
 
     private List<HabitRecord> filterCompletionsByDate(Habit habit, LocalDate startDate, LocalDate endDate) {
-        return   habit.getCompletionHistory().stream()
+        return   habit.getHabitRecords().stream()
                 .filter(record -> record.isCompleted()
                         && !record.getDate().isBefore(startDate) && !record.getDate().isAfter(endDate))
                 .toList();
     }
 
     private List<HabitRecord> filterCompletionsByWeek(Habit habit, LocalDate startDate, LocalDate endDate) {
-        return habit.getCompletionHistory().stream()
+        return habit.getHabitRecords().stream()
                 .filter(record -> {
                     LocalDate startOfWeek = startDate.with(ChronoUnit.DAYS.addTo(startDate, -startDate.getDayOfWeek().getValue() + 1));
                     LocalDate endOfWeek = endDate.with(ChronoUnit.DAYS.addTo(endDate, 7 - endDate.getDayOfWeek().getValue()));

@@ -19,26 +19,4 @@ public class User {
         this.email = email;
         this.password = password;
     }
-
-    public void addHabit(Habit habit) {
-        habits.add(habit);
-    }
-
-    public void removeHabit(String title) {
-        Habit habitToRemove = findHabitByTitle(title);
-        if (habitToRemove != null) {
-            habits.remove(habitToRemove);
-        }
-    }
-
-    public List<Habit> getAllHabits() {
-        return habits;
-    }
-
-    private Habit findHabitByTitle(String title) {
-        return habits.stream()
-                .filter(habit -> habit.getTitle().equalsIgnoreCase(title))
-                .findFirst()
-                .orElse(null);
-    }
 }
