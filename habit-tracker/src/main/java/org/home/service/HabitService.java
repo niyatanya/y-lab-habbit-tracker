@@ -1,6 +1,8 @@
 package org.home.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.home.model.Frequency;
 import org.home.model.Habit;
@@ -44,5 +46,9 @@ public class HabitService {
                 record.setCompleted(completed);
             }
         }
+    }
+
+    public List<Habit> getAllHabits(User user) {
+        return new ArrayList<>(user.getHabits().values());
     }
 }

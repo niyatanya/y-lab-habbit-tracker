@@ -49,6 +49,7 @@ public class ConsoleApp {
         System.out.println("1. Manage Habits");
         System.out.println("2. Edit Profile");
         System.out.println("3. Delete Account");
+        System.out.println("4. Admin Menu");
         System.out.println("0. Logout");
 
         int choice = Integer.parseInt(SCANNER.nextLine());
@@ -57,6 +58,7 @@ public class ConsoleApp {
             case 1 -> manageHabits();
             case 2 -> editProfile();
             case 3 -> deleteAccount();
+            case 4 -> showAdminMenu();
             case 0 -> logout();
             default -> System.out.println("Invalid option, please try again.");
         }
@@ -209,5 +211,98 @@ public class ConsoleApp {
     private static void exitApp() {
         System.out.println("Exiting the app. Goodbye!");
         System.exit(0);
+    }
+
+    public static void showAdminMenu() {
+        if (!currentUser.getRole().isAdmin()) {
+            System.out.println("Access denied. Only admins can access this menu.");
+            return;
+        }
+
+        System.out.println("Admin Menu:");
+        System.out.println("1. View all users");
+        System.out.println("2. View all habits of a user");
+        System.out.println("3. Block a user");
+        System.out.println("4. Unblock a user");
+        System.out.println("5. Delete a user");
+        System.out.println("0. Back to Main Menu");
+
+        int choice = Integer.parseInt(SCANNER.nextLine());
+
+        switch (choice) {
+            case 1 -> viewAllUsers();
+            case 2 -> viewAllHabitsOfUser();
+            case 3 -> blockUser();
+            case 4 -> unblockUser();
+            case 5 -> deleteUser();
+            case 0 -> showMainMenu();
+            default -> System.out.println("Invalid option, please try again.");
+        }
+    }
+
+    private static void viewAllUsers() {
+        System.out.println("List of all users:");
+        var users = USER_SERVICE.getAllUsers();
+        if (users.isEmpty()) {
+            System.out.println("No users found.");
+        } else {
+            users.forEach(user -> System.out.println(user.getName() + " - " + user.getEmail()));
+        }
+    }
+
+    private static void viewAllHabitsOfUser() {
+        System.out.println("Enter user email:");
+        String email = SCANNER.nextLine();
+        User user = USER_SERVICE.findUserByEmail(email);
+
+        if (user == null) {
+            System.out.println("User not found.");
+            return;
+        }
+
+        var habits = HABIT_SERVICE.getAllHabits(user);
+        if (habits.isEmpty()) {
+            System.out.println("No habits found for this user.");
+        } else {
+            habits.forEach(habit -> System.out.println(habit.getTitle() + ": " + habit.getDescription()));
+        }
+    }
+
+    private static void blockUser() {
+        System.out.println("Enter user email to block:");
+        String email = SCANNER.nextLine();
+        User user = USER_SERVICE.findUserByEmail(email);
+
+        if (user == null) {
+            System.out.println("User not found.");
+            return;
+        }
+        System.out.println(USER_SERVICE.blockUser(user));
+    }
+
+    private static void unblockUser() {
+        System.out.println("Enter user email to unblock:");
+        String email = SCANNER.nextLine();
+        User user = USER_SERVICE.findUserByEmail(email);
+
+        if (user == null) {
+            System.out.println("User not found.");
+            return;
+        }
+        System.out.println(USER_SERVICE.unblockUser(user));
+    }
+
+    private static void deleteUser() {
+        System.out.println("Enter user email to delete:");
+        String email = SCANNER.nextLine();
+        User user = USER_SERVICE.findUserByEmail(email);
+
+        if (user == null) {
+            System.out.println("User not found.");
+            return;
+        }
+
+        USER_SERVICE.deleteUser(user);
+        System.out.println("User " + user.getName() + " has been deleted.");
     }
 }

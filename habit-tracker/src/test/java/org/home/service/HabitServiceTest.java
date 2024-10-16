@@ -2,6 +2,7 @@ package org.home.service;
 
 import org.home.model.Frequency;
 import org.home.model.Habit;
+import org.home.model.Role;
 import org.home.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,7 +22,8 @@ class HabitServiceTest {
     @BeforeEach
     void setUp() {
         habitService = new HabitService();
-        user = new User("John Doe", "john@example.com", "password123");
+        Role initialRole = new Role("USER");
+        user = new User("John Doe", "john@example.com", "password123", initialRole);
     }
 
     @Test
