@@ -11,50 +11,38 @@ public class HabitService {
 
     public Habit createHabit(User user, String title, String description, Frequency frequency) {
         Habit habit = new Habit(title, description, frequency);
-        user.getHabits().add(habit);
+        user.getHabits().put(habit.getTitle(), habit);
         return habit;
     }
 
     public void editHabit(User user, String oldTitle, String newTitle, String newDescription, Frequency newFrequency) {
-        Habit habit = findHabitByTitle(user, oldTitle);
+        Habit habit = user.getHabits().get(oldTitle);
         if (habit != null) {
+            user.getHabits().remove(oldTitle);
             habit.setTitle(newTitle);
             habit.setDescription(newDescription);
             habit.setFrequency(newFrequency);
+            user.getHabits().put(newTitle, habit);
         }
     }
 
     public void deleteHabit(User user, String title) {
-        Habit habitToRemove = findHabitByTitle(user, title);
+        Habit habitToRemove = user.getHabits().get(title);
         if (habitToRemove != null) {
-            user.getHabits().remove(habitToRemove);
+            user.getHabits().remove(title);
         }
     }
 
     public void trackHabit(User user, String title, LocalDate date, boolean completed) {
-        Habit habit = findHabitByTitle(user, title);
+        Habit habit = user.getHabits().get(title);
         if (habit != null) {
-            HabitRecord record = findRecordByDate(habit, date);
+            HabitRecord record = habit.getHabitRecords().get(date);
             if (record == null) {
                 record = new HabitRecord(date, completed);
-                habit.getHabitRecords().add(record);
+                habit.getHabitRecords().put(date, record);
             } else {
                 record.setCompleted(completed);
             }
         }
-    }
-
-    Habit findHabitByTitle(User user, String title) {
-        return user.getHabits().stream()
-                .filter(habit -> habit.getTitle().equalsIgnoreCase(title))
-                .findFirst()
-                .orElse(null);
-    }
-
-    private HabitRecord findRecordByDate(Habit habit, LocalDate date) {
-        return habit.getHabitRecords().stream()
-                .filter(record -> record.getDate().equals(date))
-                .findFirst()
-                .orElse(null);
     }
 }

@@ -12,11 +12,11 @@ import java.util.Scanner;
 
 @NoArgsConstructor
 public class ConsoleApp {
-    private static final UserService userService = new UserService();
-    private static final HabitService habitService = new HabitService();
-    private static final StatisticsService statisticsService = new StatisticsService();
+    private static final UserService USER_SERVICE = new UserService();
+    private static final HabitService HABIT_SERVICE = new HabitService();
+    private static final StatisticsService STATISTICS_SERVICE = new StatisticsService();
     private static User currentUser = null;
-    private static final Scanner scanner = new Scanner(System.in);
+    private static final Scanner SCANNER = new Scanner(System.in);
 
     public static void run() {
         while (true) {
@@ -34,7 +34,7 @@ public class ConsoleApp {
         System.out.println("2. Login");
         System.out.println("0. Exit");
 
-        int choice = Integer.parseInt(scanner.nextLine());
+        int choice = Integer.parseInt(SCANNER.nextLine());
 
         switch (choice) {
             case 1 -> register();
@@ -51,7 +51,7 @@ public class ConsoleApp {
         System.out.println("3. Delete Account");
         System.out.println("0. Logout");
 
-        int choice = Integer.parseInt(scanner.nextLine());
+        int choice = Integer.parseInt(SCANNER.nextLine());
 
         switch (choice) {
             case 1 -> manageHabits();
@@ -72,7 +72,7 @@ public class ConsoleApp {
         System.out.println("6. View Habit Statistics");
         System.out.println("0. Back to Main Menu");
 
-        int choice = Integer.parseInt(scanner.nextLine());
+        int choice = Integer.parseInt(SCANNER.nextLine());
 
         switch (choice) {
             case 1 -> createHabit();
@@ -88,13 +88,13 @@ public class ConsoleApp {
 
     private static void register() {
         System.out.println("Enter your name:");
-        String name = scanner.nextLine();
+        String name = SCANNER.nextLine();
         System.out.println("Enter your email:");
-        String email = scanner.nextLine();
+        String email = SCANNER.nextLine();
         System.out.println("Enter your password:");
-        String password = scanner.nextLine();
+        String password = SCANNER.nextLine();
 
-        currentUser = userService.register(name, email, password);
+        currentUser = USER_SERVICE.register(name, email, password);
         if (currentUser != null) {
             System.out.println("Registration successful.");
         } else {
@@ -104,11 +104,11 @@ public class ConsoleApp {
 
     private static void login() {
         System.out.println("Enter your email:");
-        String email = scanner.nextLine();
+        String email = SCANNER.nextLine();
         System.out.println("Enter your password:");
-        String password = scanner.nextLine();
+        String password = SCANNER.nextLine();
 
-        currentUser = userService.login(email, password);
+        currentUser = USER_SERVICE.login(email, password);
         if (currentUser == null) {
             System.out.println("Invalid email or password. Try again.");
         }
@@ -116,20 +116,20 @@ public class ConsoleApp {
 
     private static void editProfile() {
         System.out.println("Enter new name:");
-        String newName = scanner.nextLine();
+        String newName = SCANNER.nextLine();
         System.out.println("Enter new email:");
-        String newEmail = scanner.nextLine();
+        String newEmail = SCANNER.nextLine();
         System.out.println("Enter new password:");
-        String newPassword = scanner.nextLine();
+        String newPassword = SCANNER.nextLine();
 
-        userService.editProfile(currentUser, newName, newEmail, newPassword);
+        USER_SERVICE.editProfile(currentUser, newName, newEmail, newPassword);
     }
 
     private static void deleteAccount() {
         System.out.println("Are you sure you want to delete your account? (yes/no)");
-        String confirmation = scanner.nextLine();
+        String confirmation = SCANNER.nextLine();
         if (confirmation.equalsIgnoreCase("yes")) {
-            userService.deleteUser(currentUser);
+            USER_SERVICE.deleteUser(currentUser);
             currentUser = null;
             System.out.println("Account deleted.");
         }
@@ -137,13 +137,13 @@ public class ConsoleApp {
 
     private static void createHabit() {
         System.out.println("Enter habit title:");
-        String title = scanner.nextLine();
+        String title = SCANNER.nextLine();
         System.out.println("Enter habit description:");
-        String description = scanner.nextLine();
+        String description = SCANNER.nextLine();
         System.out.println("Enter habit frequency (DAILY/WEEKLY):");
-        Frequency frequency = Frequency.fromString(scanner.nextLine().toUpperCase());
+        Frequency frequency = Frequency.fromString(SCANNER.nextLine().toUpperCase());
 
-        habitService.createHabit(currentUser, title, description, frequency);
+        HABIT_SERVICE.createHabit(currentUser, title, description, frequency);
         System.out.println("Habit \"" + title + "\" successfully created!");
     }
 
@@ -152,50 +152,53 @@ public class ConsoleApp {
         if (habits.isEmpty()) {
             System.out.println("You have no habits yet.");
         } else {
-            habits.forEach(habit -> System.out.println(habit.getTitle() + ": " + habit.getDescription()));
+            habits.forEach((title, habit) -> {
+                System.out.println(title  + ": " + habit.getDescription());
+            });
         }
     }
 
     private static void editHabit() {
         System.out.println("Enter the title of the habit you want to edit:");
-        String oldTitle = scanner.nextLine();
+        String oldTitle = SCANNER.nextLine();
         System.out.println("Enter new title:");
-        String newTitle = scanner.nextLine();
+        String newTitle = SCANNER.nextLine();
         System.out.println("Enter new description:");
-        String newDescription = scanner.nextLine();
+        String newDescription = SCANNER.nextLine();
         System.out.println("Enter new frequency (DAILY/WEEKLY):");
-        Frequency newFrequency = Frequency.fromString(scanner.nextLine().toUpperCase());
+        Frequency newFrequency = Frequency.fromString(SCANNER.nextLine().toUpperCase());
 
-        habitService.editHabit(currentUser, oldTitle, newTitle, newDescription, newFrequency);
+        HABIT_SERVICE.editHabit(currentUser, oldTitle, newTitle, newDescription, newFrequency);
     }
 
     private static void deleteHabit() {
         System.out.println("Enter the title of the habit you want to delete:");
-        String title = scanner.nextLine();
+        String title = SCANNER.nextLine();
 
-        habitService.deleteHabit(currentUser, title);
+        HABIT_SERVICE.deleteHabit(currentUser, title);
     }
 
     private static void trackHabitCompletion() {
         System.out.println("Enter the title of the habit you want to track:");
-        String title = scanner.nextLine();
+        String title = SCANNER.nextLine();
         System.out.println("Enter the date (yyyy-MM-dd):");
-        LocalDate date = LocalDate.parse(scanner.nextLine());
+        LocalDate date = LocalDate.parse(SCANNER.nextLine());
         System.out.println("Was the habit completed? (true/false):");
-        boolean completed = Boolean.parseBoolean(scanner.nextLine());
+        boolean completed = Boolean.parseBoolean(SCANNER.nextLine());
 
-        habitService.trackHabit(currentUser, title, date, completed);
+        HABIT_SERVICE.trackHabit(currentUser, title, date, completed);
     }
 
     private static void viewHabitStatistics() {
         System.out.println("Enter the title of the habit for the report:");
-        String habitTitle = scanner.nextLine();
+        String habitTitle = SCANNER.nextLine();
         System.out.println("Enter the report start date (yyyy-MM-dd):");
-        LocalDate startDate = LocalDate.parse(scanner.nextLine());
+        LocalDate startDate = LocalDate.parse(SCANNER.nextLine());
         System.out.println("Enter the report end date (yyyy-MM-dd):");
-        LocalDate endDate = LocalDate.parse(scanner.nextLine());
+        LocalDate endDate = LocalDate.parse(SCANNER.nextLine());
 
-        statisticsService.generateProgressReport(currentUser, habitTitle, startDate, endDate);
+        System.out.println(STATISTICS_SERVICE.generateProgressReport(
+                currentUser, habitTitle, startDate, endDate));
     }
 
     private static void logout() {

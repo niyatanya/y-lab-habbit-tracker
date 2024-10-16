@@ -3,6 +3,7 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
     application
+    checkstyle
     id("io.freefair.lombok") version "8.6"
 }
 

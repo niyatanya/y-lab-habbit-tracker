@@ -2,14 +2,13 @@ package org.home.service;
 
 import org.home.model.Frequency;
 import org.home.model.Habit;
-import org.home.model.HabitRecord;
 import org.home.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,7 +36,7 @@ class HabitServiceTest {
         assertThat(createdHabit.getTitle()).isEqualTo(title);
         assertThat(createdHabit.getDescription()).isEqualTo(description);
         assertThat(createdHabit.getFrequency()).isEqualTo(frequency);
-        assertThat(user.getHabits()).contains(createdHabit);
+        assertThat(user.getHabits()).containsKey(title);
     }
 
     @Test
@@ -65,7 +64,7 @@ class HabitServiceTest {
 
         habitService.deleteHabit(user, title);
 
-        assertThat(user.getHabits()).doesNotContain(habit);
+        assertThat(user.getHabits()).doesNotContainKey(title);
     }
 
     @Test
@@ -74,10 +73,10 @@ class HabitServiceTest {
         Habit habit1 = habitService.createHabit(user, "Read", "Read daily", Frequency.DAILY);
         Habit habit2 = habitService.createHabit(user, "Exercise", "Exercise weekly", Frequency.WEEKLY);
 
-        List<Habit> habits = user.getHabits();
+        Map<String, Habit> habits = user.getHabits();
 
         assertThat(habits).hasSize(2);
-        assertThat(habits).contains(habit1, habit2);
+        assertThat(habits).containsKeys(habit1.getTitle(), habit2.getTitle());
     }
 
     @Test
@@ -90,30 +89,6 @@ class HabitServiceTest {
         Habit habit = habitService.createHabit(user, title, "Description", Frequency.DAILY);
 
         habitService.trackHabit(user, title, date, completed);
-
-        HabitRecord record = new HabitRecord(date, completed);
-        assertThat(habit.getHabitRecords()).contains(record);
-    }
-
-    @Test
-    @DisplayName("Find habit by title with existing title")
-    void testFindHabitByTitle_Found() {
-        String title = "Read a book";
-        Habit habit = habitService.createHabit(user, title, "Read daily", Frequency.DAILY);
-
-        Habit foundHabit = habitService.findHabitByTitle(user, title);
-
-        assertThat(foundHabit).isNotNull();
-        assertThat(foundHabit.getTitle()).isEqualTo(title);
-    }
-
-    @Test
-    @DisplayName("Find habit by title with non-existing title")
-    void testFindHabitByTitle_NotFound() {
-        String title = "Non-existing habit";
-
-        Habit foundHabit = habitService.findHabitByTitle(user, title);
-
-        assertThat(foundHabit).isNull();
+        assertThat(habit.getHabitRecords()).containsKey(date);
     }
 }

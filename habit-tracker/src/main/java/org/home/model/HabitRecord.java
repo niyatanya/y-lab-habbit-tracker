@@ -16,8 +16,12 @@ public class HabitRecord {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         HabitRecord that = (HabitRecord) o;
         return completed == that.completed && Objects.equals(date, that.date);
     }

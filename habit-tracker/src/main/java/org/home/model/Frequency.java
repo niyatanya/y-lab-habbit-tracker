@@ -1,6 +1,6 @@
 package org.home.model;
 
-public class Frequency {
+public final class Frequency {
     private final String name;
 
     private Frequency(String name) {

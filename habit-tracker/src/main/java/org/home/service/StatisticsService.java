@@ -6,9 +6,11 @@ import org.home.model.HabitRecord;
 import org.home.model.User;
 import org.home.model.Frequency;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @NoArgsConstructor
@@ -16,13 +18,13 @@ public class StatisticsService {
     private final HabitService habitService = new HabitService();
 
     public int getCurrentStreak(User user, String habitTitle) {
-        Habit habit = habitService.findHabitByTitle(user, habitTitle);
+        Habit habit = user.getHabits().get(habitTitle);
         if (habit == null) {
             System.out.println("Habit not found.");
             return 0;
         }
 
-        List<HabitRecord> completions = habit.getHabitRecords();
+        Map<LocalDate, HabitRecord> completions = habit.getHabitRecords();
         if (completions.isEmpty()) {
             return 0;
         }
@@ -32,14 +34,14 @@ public class StatisticsService {
 
 
         if (habit.getFrequency() == Frequency.DAILY) {
-            for (HabitRecord record : completions) {
+            for (HabitRecord record : completions.values()) {
                 if (record.isCompleted()) {
                     streak++;
                     currentDate = currentDate.minusDays(1);
                 }
             }
         } else if (habit.getFrequency() == Frequency.WEEKLY) {
-            for (HabitRecord record : completions) {
+            for (HabitRecord record : completions.values()) {
                 if (record.isCompleted()) {
                     streak++;
                     currentDate = currentDate.minusWeeks(1);
@@ -50,7 +52,7 @@ public class StatisticsService {
     }
 
     public double getSuccessPercentage(User user, String habitTitle, LocalDate startDate, LocalDate endDate) {
-        Habit habit = habitService.findHabitByTitle(user, habitTitle);
+        Habit habit = user.getHabits().get(habitTitle);
         if (habit == null) {
             System.out.println("Habit not found.");
             return 0.0;
@@ -74,11 +76,10 @@ public class StatisticsService {
         return (double) completions.size() / totalDays * 100;
     }
 
-    public void generateProgressReport(User user, String habitTitle, LocalDate startDate, LocalDate endDate) {
-        Habit habit = habitService.findHabitByTitle(user, habitTitle);
+    public String generateProgressReport(User user, String habitTitle, LocalDate startDate, LocalDate endDate) {
+        Habit habit = user.getHabits().get(habitTitle);
         if (habit == null) {
-            System.out.println("Habit not found.");
-            return;
+            return "Habit not found.";
         }
 
         List<HabitRecord> completions;
@@ -96,29 +97,35 @@ public class StatisticsService {
         double successRate = (double) successfulDays / totalDays * 100;
         int currentStreak = getCurrentStreak(user, habitTitle);
 
-        System.out.printf("Progress Report for Habit: %s%n" +
-                        "Period: %s to %s%n" +
-                        "Total intervals: %d%n" +
-                        "Successful intervals: %d%n" +
-                        "Success rate: %.2f%%%n" +
-                        "Current streak: %d intervals",
+        return String.format("Progress Report for Habit: %s%n"
+                        + "Period: %s to %s%n"
+                        + "Total intervals: %d%n"
+                        + "Successful intervals: %d%n"
+                        + "Success rate: %.2f%%%n"
+                        + "Current streak: %d intervals",
                 habitTitle, startDate, endDate, totalDays, successfulDays, successRate, currentStreak);
     }
 
     private List<HabitRecord> filterCompletionsByDate(Habit habit, LocalDate startDate, LocalDate endDate) {
-        return   habit.getHabitRecords().stream()
-                .filter(record -> record.isCompleted()
-                        && !record.getDate().isBefore(startDate) && !record.getDate().isAfter(endDate))
+        return habit.getHabitRecords().entrySet().stream()
+                .filter(entry -> !entry.getKey().isBefore(startDate)
+                        && !entry.getKey().isAfter(endDate)
+                        && entry.getValue().isCompleted())
+                .map(Map.Entry::getValue)
                 .toList();
     }
 
     private List<HabitRecord> filterCompletionsByWeek(Habit habit, LocalDate startDate, LocalDate endDate) {
-        return habit.getHabitRecords().stream()
-                .filter(record -> {
-                    LocalDate startOfWeek = startDate.with(ChronoUnit.DAYS.addTo(startDate, -startDate.getDayOfWeek().getValue() + 1));
-                    LocalDate endOfWeek = endDate.with(ChronoUnit.DAYS.addTo(endDate, 7 - endDate.getDayOfWeek().getValue()));
-                    return !record.getDate().isBefore(startOfWeek) && !record.getDate().isAfter(endOfWeek);
+        return habit.getHabitRecords().entrySet().stream()
+                .filter(entry -> {
+                    LocalDate date = entry.getKey();
+                    LocalDate startOfWeek = startDate.with(DayOfWeek.MONDAY);
+                    LocalDate endOfWeek = endDate.with(DayOfWeek.SUNDAY);
+                    return !date.isBefore(startOfWeek)
+                            && !date.isAfter(endOfWeek)
+                            && entry.getValue().isCompleted();
                 })
+                .map(Map.Entry::getValue)
                 .collect(Collectors.toList());
     }
 }
