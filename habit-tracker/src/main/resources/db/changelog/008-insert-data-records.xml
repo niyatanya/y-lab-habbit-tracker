@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd"
+        logicalFilePath="db/changelog.xml">
+
+    <changeSet id="008-insert-data-records" author="tanya">
+
+        <insert tableName="records" schemaName="ylab_schema">
+            <column name="id" valueNumeric="1"/>
+            <column name="date" value="2024-10-01"/>
+            <column name="completed" value="true"/>
+            <column name="habit_id" valueNumeric="1"/>
+        </insert>
+        <insert tableName="records" schemaName="ylab_schema">
+            <column name="id" valueNumeric="2"/>
+            <column name="date" value="2024-10-02"/>
+            <column name="completed" value="true"/>
+            <column name="habit_id" valueNumeric="1"/>
+        </insert>
+        <insert tableName="records" schemaName="ylab_schema">
+            <column name="id" valueNumeric="3"/>
+            <column name="date" value="2024-10-03"/>
+            <column name="completed" value="true"/>
+            <column name="habit_id" valueNumeric="1"/>
+        </insert>
+        <insert tableName="records" schemaName="ylab_schema">
+            <column name="id" valueNumeric="4"/>
+            <column name="date" value="2024-10-04"/>
+            <column name="completed" value="false"/>
+            <column name="habit_id" valueNumeric="1"/>
+        </insert>
+        <insert tableName="records" schemaName="ylab_schema">
+            <column name="id" valueNumeric="5"/>
+            <column name="date" value="2024-10-05"/>
+            <column name="completed" value="true"/>
+            <column name="habit_id" valueNumeric="1"/>
+        </insert>
+        <insert tableName="records" schemaName="ylab_schema">
+            <column name="id" valueNumeric="6"/>
+            <column name="date" value="2024-10-07"/>
+            <column name="completed" value="true"/>
+            <column name="habit_id" valueNumeric="1"/>
+        </insert>
+
+        <insert tableName="records" schemaName="ylab_schema">
+            <column name="id" valueNumeric="7"/>
+            <column name="date" value="2024-10-05"/>
+            <column name="completed" value="true"/>
+            <column name="habit_id" valueNumeric="2"/>
+        </insert>
+        <insert tableName="records" schemaName="ylab_schema">
+            <column name="id" valueNumeric="8"/>
+            <column name="date" value="2024-10-12"/>
+            <column name="completed" value="true"/>
+            <column name="habit_id" valueNumeric="2"/>
+        </insert>
+
+        <insert tableName="records" schemaName="ylab_schema">
+            <column name="id" valueNumeric="9"/>
+            <column name="date" value="2024-10-01"/>
+            <column name="completed" value="true"/>
+            <column name="habit_id" valueNumeric="3"/>
+        </insert>
+        <insert tableName="records" schemaName="ylab_schema">
+            <column name="id" valueNumeric="10"/>
+            <column name="date" value="2024-10-03"/>
+            <column name="completed" value="true"/>
+            <column name="habit_id" valueNumeric="3"/>
+        </insert>
+        <insert tableName="records" schemaName="ylab_schema">
+            <column name="id" valueNumeric="11"/>
+            <column name="date" value="2024-10-05"/>
+            <column name="completed" value="true"/>
+            <column name="habit_id" valueNumeric="3"/>
+        </insert>
+        <insert tableName="records" schemaName="ylab_schema">
+            <column name="id" valueNumeric="12"/>
+            <column name="date" value="2024-10-06"/>
+            <column name="completed" value="false"/>
+            <column name="habit_id" valueNumeric="3"/>
+        </insert>
+
+        <insert tableName="records" schemaName="ylab_schema">
+            <column name="id" valueNumeric="13"/>
+            <column name="date" value="2024-10-01"/>
+            <column name="completed" value="true"/>
+            <column name="habit_id" valueNumeric="4"/>
+        </insert>
+        <insert tableName="records" schemaName="ylab_schema">
+            <column name="id" valueNumeric="14"/>
+            <column name="date" value="2024-10-02"/>
+            <column name="completed" value="true"/>
+            <column name="habit_id" valueNumeric="4"/>
+        </insert>
+        <insert tableName="records" schemaName="ylab_schema">
+            <column name="id" valueNumeric="15"/>
+            <column name="date" value="2024-10-03"/>
+            <column name="completed" value="true"/>
+            <column name="habit_id" valueNumeric="4"/>
+        </insert>
+
+        <insert tableName="records" schemaName="ylab_schema">
+            <column name="id" valueNumeric="16"/>
+            <column name="date" value="2024-10-01"/>
+            <column name="completed" value="true"/>
+            <column name="habit_id" valueNumeric="5"/>
+        </insert>
+        <insert tableName="records" schemaName="ylab_schema">
+            <column name="id" valueNumeric="17"/>
+            <column name="date" value="2024-10-02"/>
+            <column name="completed" value="false"/>
+            <column name="habit_id" valueNumeric="5"/>
+        </insert>
+        <insert tableName="records" schemaName="ylab_schema">
+            <column name="id" valueNumeric="18"/>
+            <column name="date" value="2024-10-03"/>
+            <column name="completed" value="false"/>
+            <column name="habit_id" valueNumeric="5"/>
+        </insert>
+        <insert tableName="records" schemaName="ylab_schema">
+            <column name="id" valueNumeric="19"/>
+            <column name="date" value="2024-10-04"/>
+            <column name="completed" value="false"/>
+            <column name="habit_id" valueNumeric="5"/>
+        </insert>
+
+        <insert tableName="records" schemaName="ylab_schema">
+            <column name="id" valueNumeric="20"/>
+            <column name="date" value="2024-10-01"/>
+            <column name="completed" value="true"/>
+            <column name="habit_id" valueNumeric="6"/>
+        </insert>
+        <insert tableName="records" schemaName="ylab_schema">
+            <column name="id" valueNumeric="21"/>
+            <column name="date" value="2024-10-08"/>
+            <column name="completed" value="true"/>
+            <column name="habit_id" valueNumeric="6"/>
+        </insert>
+        <insert tableName="records" schemaName="ylab_schema">
+            <column name="id" valueNumeric="22"/>
+            <column name="date" value="2024-10-15"/>
+            <column name="completed" value="true"/>
+            <column name="habit_id" valueNumeric="6"/>
+        </insert>
+
+    </changeSet>
+</databaseChangeLog>
