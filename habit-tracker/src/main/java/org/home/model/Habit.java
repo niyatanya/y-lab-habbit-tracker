@@ -1,50 +1,35 @@
 package org.home.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.time.LocalDate;
-
+/**
+ * The {@code Habit} class represents a user's habit with a title, description,
+ * frequency, and the ID of the user who owns it.
+ */
 @Getter
 @Setter
+@AllArgsConstructor
 public class Habit {
+    private Long id;
     private String title;
     private String description;
     private Frequency frequency;
-    private List<HabitRecord> habitRecords = new ArrayList<>();
+    private Long userId;
 
-    public Habit(String title, String description, Frequency frequency) {
+    /**
+     * Constructs a new {@code Habit} with the specified title, description, frequency, and user ID.
+     *
+     * @param title       the title of the habit
+     * @param description a brief description of the habit
+     * @param frequency   the frequency of the habit
+     * @param userId      the ID of the user who owns the habit
+     */
+    public Habit(String title, String description, Frequency frequency, Long userId) {
         this.title = title;
         this.description = description;
         this.frequency = frequency;
-    }
-
-    public void editHabit(String newTitle, String newDescription, Frequency newFrequency) {
-        this.title = newTitle;
-        this.description = newDescription;
-        this.frequency = newFrequency;
-    }
-
-    public void trackCompletion(LocalDate date, boolean completed) {
-        HabitRecord record = findRecordByDate(date);
-        if (record == null) {
-            record = new HabitRecord(date, completed);
-            habitRecords.add(record);
-        } else {
-            record.setCompleted(completed);
-        }
-    }
-
-    private HabitRecord findRecordByDate(LocalDate date) {
-        return habitRecords.stream()
-                .filter(record -> record.getDate().equals(date))
-                .findFirst()
-                .orElse(null);
-    }
-
-    public List<HabitRecord> getCompletionHistory() {
-        return habitRecords;
+        this.userId = userId;
     }
 }

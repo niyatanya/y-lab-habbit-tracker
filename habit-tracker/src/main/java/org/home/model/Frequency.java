@@ -1,28 +1,21 @@
 package org.home.model;
 
-public class Frequency {
-    private final String name;
+/**
+ * The {@code Frequency} enum represents the frequency of a habit.
+ * It defines two possible values:
+ * <ul>
+ *   <li>{@link #DAILY} - A habit that is performed every day.</li>
+ *   <li>{@link #WEEKLY} - A habit that is performed once a week.</li>
+ * </ul>
+ */
+public enum Frequency {
+    /**
+     * Represents a habit that needs to be done daily.
+     */
+    DAILY,
 
-    private Frequency(String name) {
-        this.name = name;
-    }
-
-    public static final Frequency DAILY = new Frequency("DAILY");
-    public static final Frequency WEEKLY = new Frequency("WEEKLY");
-
-    public static Frequency fromString(String value) {
-        switch (value.toUpperCase()) {
-            case "DAILY":
-                return DAILY;
-            case "WEEKLY":
-                return WEEKLY;
-            default:
-                throw new IllegalArgumentException("Invalid frequency: " + value);
-        }
-    }
-
-    @Override
-    public String toString() {
-        return name;
-    }
+    /**
+     * Represents a habit that needs to be done weekly.
+     */
+    WEEKLY
 }

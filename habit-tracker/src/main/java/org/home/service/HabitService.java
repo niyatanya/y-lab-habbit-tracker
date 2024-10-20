@@ -1,47 +1,98 @@
 package org.home.service;
 
-import java.util.List;
-import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 import org.home.model.Frequency;
 import org.home.model.Habit;
 import org.home.model.User;
+import org.home.repository.HabitRepository;
 
+/**
+ * The {@code HabitService} class provides methods for managing habits associated with users.
+ */
 public class HabitService {
+
+    /**
+     * Creates a new habit for a specified user.
+     *
+     * @param user        the {@link User} associated with the habit
+     * @param title       the title of the new habit
+     * @param description a description of the new habit
+     * @param frequency   the {@link Frequency} indicating how often the habit should be performed
+     * @return the created {@link Habit}, or {@code null} if a habit with the same title already exists for the user
+     */
     public Habit createHabit(User user, String title, String description, Frequency frequency) {
-        Habit habit = new Habit(title, description, frequency);
-        user.addHabit(habit);
+        if (HabitRepository.habitExists(user.getId(), title)) {
+            return null;
+        }
+
+        Habit habit = new Habit(title, description, frequency, user.getId());
+        HabitRepository.save(habit);
         return habit;
     }
 
+    /**
+     * Edits an existing habit for a specified user.
+     *
+     * @param user          the {@link User} associated with the habit
+     * @param oldTitle      the current title of the habit
+     * @param newTitle      the new title for the habit
+     * @param newDescription the new description for the habit
+     * @param newFrequency  the new {@link Frequency} for the habit
+     */
     public void editHabit(User user, String oldTitle, String newTitle, String newDescription, Frequency newFrequency) {
-        Habit habit = findHabitByTitle(user, oldTitle);
-        if (habit != null) {
-            habit.editHabit(newTitle, newDescription, newFrequency);
+        Optional<Habit> maybeHabit = HabitRepository.findByTitleAndUserId(oldTitle, user.getId());
+        if (maybeHabit.isPresent()) {
+            Habit habit = maybeHabit.get();
+            habit.setTitle(newTitle);
+            habit.setDescription(newDescription);
+            habit.setFrequency(newFrequency);
+            HabitRepository.update(habit);
         }
     }
 
+    /**
+     * Deletes a habit for a specified user.
+     *
+     * @param user the {@link User} associated with the habit
+     * @param title the title of the habit to delete
+     */
     public void deleteHabit(User user, String title) {
-        Habit habit = findHabitByTitle(user, title);
-        if (habit != null) {
-            user.removeHabit(title);
-        }
+        Optional<Habit> maybeHabit = HabitRepository.findByTitleAndUserId(title, user.getId());
+        maybeHabit.ifPresent(HabitRepository::delete);
     }
 
-    public List<Habit> getAllHabits(User user) {
-        return user.getAllHabits();
+    /**
+     * Retrieves all habits associated with a specified user.
+     *
+     * @param user the {@link User} for whom to retrieve habits
+     * @return a map of titles to {@link Habit} objects
+     */
+    public Map<String, Habit> getAllHabits(User user) {
+        return new HashMap<>(HabitRepository.getAllUserHabits(user));
     }
 
-    public void trackHabit(User user, String title, LocalDate date, boolean completed) {
-        Habit habit = findHabitByTitle(user, title);
-        if (habit != null) {
-            habit.trackCompletion(date, completed);
-        }
+    /**
+     * Finds a habit by title and user ID.
+     *
+     * @param user  the {@link User} associated with the habit
+     * @param title the title of the habit to find
+     * @return the found {@link Habit}
+     */
+    public Habit findByTitleAndUserId(User user, String title) {
+        return HabitRepository.findByTitleAndUserId(title, user.getId()).orElseThrow();
     }
-    Habit findHabitByTitle(User user, String title) {
-        return user.getAllHabits().stream()
-                .filter(habit -> habit.getTitle().equalsIgnoreCase(title))
-                .findFirst()
-                .orElse(null);
+
+    /**
+     * Checks if a habit exists for a specific user with a given title.
+     *
+     * @param userId the ID of the user to check
+     * @param title  the title of the habit to check
+     * @return {@code true} if the habit exists; {@code false} otherwise
+     */
+    public boolean habitExists(Long userId, String title) {
+        return HabitRepository.habitExists(userId, title);
     }
 }

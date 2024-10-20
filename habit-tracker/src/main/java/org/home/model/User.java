@@ -1,44 +1,35 @@
 package org.home.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
-
+/**
+ * The {@code User} class represents a user in the application with personal details and role information.
+ */
 @Getter
 @Setter
+@AllArgsConstructor
 public class User {
+    private Long id;
     private String name;
     private String email;
     private String password;
-    private List<Habit> habits = new ArrayList<>();
+    private Role role;
+    private boolean isBlocked = false;
 
-    public User(String name, String email, String password) {
+    /**
+     * Constructs a new {@code User} with the specified parameters.
+     *
+     * @param name     the name of the user
+     * @param email    the email address of the user
+     * @param password the password for the user account
+     * @param role     the role of the user
+     */
+    public User(String name, String email, String password, Role role) {
         this.name = name;
         this.email = email;
         this.password = password;
-    }
-
-    public void addHabit(Habit habit) {
-        habits.add(habit);
-    }
-
-    public void removeHabit(String title) {
-        Habit habitToRemove = findHabitByTitle(title);
-        if (habitToRemove != null) {
-            habits.remove(habitToRemove);
-        }
-    }
-
-    public List<Habit> getAllHabits() {
-        return habits;
-    }
-
-    private Habit findHabitByTitle(String title) {
-        return habits.stream()
-                .filter(habit -> habit.getTitle().equalsIgnoreCase(title))
-                .findFirst()
-                .orElse(null);
+        this.role = role;
     }
 }

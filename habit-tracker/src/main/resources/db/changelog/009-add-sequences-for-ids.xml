@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd"
+        logicalFilePath="db/changelog.xml">
+
+    <changeSet id="009-add-sequences-for-ids" author="tanya">
+
+        <createSequence schemaName="ylab_schema" sequenceName="user_id_seq"
+                        dataType="int" incrementBy="1" startValue="4"/>
+        <createSequence schemaName="ylab_schema" sequenceName="habit_id_seq"
+                        dataType="int" incrementBy="1" startValue="7"/>
+        <createSequence schemaName="ylab_schema" sequenceName="record_id_seq"
+                        dataType="int" incrementBy="1" startValue="23"/>
+
+        <addDefaultValue schemaName="ylab_schema" tableName="users" columnName="id"
+                         defaultValueSequenceNext="user_id_seq"/>
+        <addDefaultValue schemaName="ylab_schema" tableName="habits" columnName="id"
+                         defaultValueSequenceNext="habit_id_seq"/>
+        <addDefaultValue schemaName="ylab_schema" tableName="records" columnName="id"
+                         defaultValueSequenceNext="record_id_seq"/>
+
+    </changeSet>
+</databaseChangeLog>
