@@ -2,77 +2,78 @@ package org.home.service;
 
 import org.home.model.Role;
 import org.home.model.User;
+import org.home.repository.UserRepository;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
+import static org.home.model.Role.ADMIN;
 
 public class UserService {
-    private final Map<String, User> users = new HashMap<>();
 
     public User register(String name, String email, String password) {
-        if (users.containsKey(email)) {
+        if (UserRepository.emailIsAlreadyRegistered(email)) {
             return null;
         }
 
-        Role initialRole = new Role("USER");
-        User newUser = new User(name, email, password, initialRole);
-        users.put(email, newUser);
+        User newUser = new User(name, email, password, Role.USER);
+        UserRepository.save(newUser);
         return newUser;
     }
 
     public User login(String email, String password) {
-        User user = users.get(email);
+        Optional<User> maybeUser = UserRepository.findByEmail(email);
 
-        if (user != null) {
-            if (user.isBlocked()) {
-                System.out.println("This account is blocked.");
-                return null;
-            }
-            if (user.getPassword().equals(password)) {
-                return user;
-            }
+        if (maybeUser.isEmpty()) {
+            return null;
+        }
+
+        User user = maybeUser.get();
+        if (user.isBlocked()) {
+            System.out.println("This account is blocked.");
+            return null;
+        } else if (user.getPassword().equals(password)) {
+            return user;
         }
         return null;
     }
 
     public void editProfile(User user, String newName, String newEmail, String newPassword) {
-        if (!user.getEmail().equals(newEmail) && users.containsKey(newEmail)) {
+        if (!user.getEmail().equals(newEmail) && UserRepository.emailIsAlreadyRegistered(newEmail)) {
             return;
         }
 
-        users.remove(user.getEmail());
         user.setName(newName);
         user.setEmail(newEmail);
         user.setPassword(newPassword);
-        users.put(newEmail, user);
+        UserRepository.update(user);
     }
 
     public void deleteUser(User user) {
-        if (user.getRole().isAdmin()) {
+        if (user.getRole().equals(ADMIN)) {
             System.out.println("Cannot delete an admin user.");
         } else {
-            users.remove(user.getEmail());
-            System.out.println("User " + user.getName() + " has been deleted.");
+            UserRepository.delete(user);
         }
     }
 
-    public List<User> getAllUsers() {
-        return new ArrayList<>(users.values());
+    public Map<String, User> getAllUsers() {
+        return new HashMap<>(UserRepository.getEntities());
     }
 
     public User findUserByEmail(String email) {
-        return users.get(email);
+        return UserRepository.findByEmail(email).orElseThrow();
     }
 
     public String blockUser(User user) {
         if (user.isBlocked()) {
             return "User is already blocked.";
-        } else if (user.getRole().isAdmin()) {
+        } else if (user.getRole().equals(ADMIN)) {
             return "Cannot block an admin user.";
         } else {
             user.setBlocked(true);
+            UserRepository.update(user);
             return "User " + user.getName() + " has been blocked.";
         }
     }
@@ -82,6 +83,7 @@ public class UserService {
             return "User is already unblocked.";
         } else {
             user.setBlocked(false);
+            UserRepository.update(user);
             return "User " + user.getName() + " has been unblocked.";
         }
     }

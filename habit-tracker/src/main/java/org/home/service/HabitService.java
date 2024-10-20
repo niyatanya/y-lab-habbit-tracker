@@ -1,54 +1,51 @@
 package org.home.service;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 import org.home.model.Frequency;
 import org.home.model.Habit;
-import org.home.model.HabitRecord;
 import org.home.model.User;
+import org.home.repository.HabitRepository;
 
 public class HabitService {
 
     public Habit createHabit(User user, String title, String description, Frequency frequency) {
-        Habit habit = new Habit(title, description, frequency);
-        user.getHabits().put(habit.getTitle(), habit);
+        if (HabitRepository.habitExists(user.getId(), title)) {
+            return null;
+        }
+
+        Habit habit = new Habit(title, description, frequency, user.getId());
+        HabitRepository.save(habit);
         return habit;
     }
 
     public void editHabit(User user, String oldTitle, String newTitle, String newDescription, Frequency newFrequency) {
-        Habit habit = user.getHabits().get(oldTitle);
-        if (habit != null) {
-            user.getHabits().remove(oldTitle);
+        Optional<Habit> maybeHabit = HabitRepository.findByTitleAndUserId(oldTitle, user.getId());
+        if (maybeHabit.isPresent()) {
+            Habit habit = maybeHabit.get();
             habit.setTitle(newTitle);
             habit.setDescription(newDescription);
             habit.setFrequency(newFrequency);
-            user.getHabits().put(newTitle, habit);
+            HabitRepository.update(habit);
         }
     }
 
     public void deleteHabit(User user, String title) {
-        Habit habitToRemove = user.getHabits().get(title);
-        if (habitToRemove != null) {
-            user.getHabits().remove(title);
-        }
+        Optional<Habit> maybeHabit = HabitRepository.findByTitleAndUserId(title, user.getId());
+        maybeHabit.ifPresent(HabitRepository::delete);
     }
 
-    public void trackHabit(User user, String title, LocalDate date, boolean completed) {
-        Habit habit = user.getHabits().get(title);
-        if (habit != null) {
-            HabitRecord record = habit.getHabitRecords().get(date);
-            if (record == null) {
-                record = new HabitRecord(date, completed);
-                habit.getHabitRecords().put(date, record);
-            } else {
-                record.setCompleted(completed);
-            }
-        }
+    public Map<String, Habit> getAllHabits(User user) {
+        return new HashMap<>(HabitRepository.getAllUserHabits(user));
     }
 
-    public List<Habit> getAllHabits(User user) {
-        return new ArrayList<>(user.getHabits().values());
+    public Habit findByTitleAndUserId(User user, String title) {
+        return HabitRepository.findByTitleAndUserId(title, user.getId()).orElseThrow();
+    }
+
+    public boolean habitExists(Long userId, String title) {
+        return HabitRepository.habitExists(userId, title);
     }
 }

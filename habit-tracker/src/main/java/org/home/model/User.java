@@ -1,20 +1,19 @@
 package org.home.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Getter
 @Setter
+@AllArgsConstructor
 public class User {
+    private Long id;
     private String name;
     private String email;
     private String password;
     private Role role;
     private boolean isBlocked = false;
-    private final Map<String, Habit> habits = new HashMap<>();
 
     public User(String name, String email, String password, Role role) {
         this.name = name;

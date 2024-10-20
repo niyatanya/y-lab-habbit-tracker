@@ -2,18 +2,24 @@ package org.home.console;
 
 import lombok.NoArgsConstructor;
 import org.home.model.Frequency;
+import org.home.model.Habit;
 import org.home.model.User;
+import org.home.service.HabitRecordService;
 import org.home.service.HabitService;
 import org.home.service.StatisticsService;
 import org.home.service.UserService;
 
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.Scanner;
+
+import static org.home.model.Role.ADMIN;
 
 @NoArgsConstructor
 public class ConsoleApp {
     private static final UserService USER_SERVICE = new UserService();
     private static final HabitService HABIT_SERVICE = new HabitService();
+    private static final HabitRecordService RECORD_SERVICE = new HabitRecordService();
     private static final StatisticsService STATISTICS_SERVICE = new StatisticsService();
     private static User currentUser = null;
     private static final Scanner SCANNER = new Scanner(System.in);
@@ -106,7 +112,7 @@ public class ConsoleApp {
 
     private static void login() {
         System.out.println("Enter your email:");
-        String email = SCANNER.nextLine();
+        String email = SCANNER.nextLine().trim();
         System.out.println("Enter your password:");
         String password = SCANNER.nextLine();
 
@@ -143,14 +149,14 @@ public class ConsoleApp {
         System.out.println("Enter habit description:");
         String description = SCANNER.nextLine();
         System.out.println("Enter habit frequency (DAILY/WEEKLY):");
-        Frequency frequency = Frequency.fromString(SCANNER.nextLine().toUpperCase());
+        Frequency frequency = Frequency.valueOf(SCANNER.nextLine().toUpperCase());
 
         HABIT_SERVICE.createHabit(currentUser, title, description, frequency);
         System.out.println("Habit \"" + title + "\" successfully created!");
     }
 
     private static void viewAllHabits() {
-        var habits = currentUser.getHabits();
+        Map<String, Habit> habits = HABIT_SERVICE.getAllHabits(currentUser);
         if (habits.isEmpty()) {
             System.out.println("You have no habits yet.");
         } else {
@@ -168,7 +174,7 @@ public class ConsoleApp {
         System.out.println("Enter new description:");
         String newDescription = SCANNER.nextLine();
         System.out.println("Enter new frequency (DAILY/WEEKLY):");
-        Frequency newFrequency = Frequency.fromString(SCANNER.nextLine().toUpperCase());
+        Frequency newFrequency = Frequency.valueOf((SCANNER.nextLine().toUpperCase()));
 
         HABIT_SERVICE.editHabit(currentUser, oldTitle, newTitle, newDescription, newFrequency);
     }
@@ -188,7 +194,8 @@ public class ConsoleApp {
         System.out.println("Was the habit completed? (true/false):");
         boolean completed = Boolean.parseBoolean(SCANNER.nextLine());
 
-        HABIT_SERVICE.trackHabit(currentUser, title, date, completed);
+        Habit habit = HABIT_SERVICE.findByTitleAndUserId(currentUser, title);
+        RECORD_SERVICE.createRecord(habit, date, completed);
     }
 
     private static void viewHabitStatistics() {
@@ -214,7 +221,7 @@ public class ConsoleApp {
     }
 
     public static void showAdminMenu() {
-        if (!currentUser.getRole().isAdmin()) {
+        if (!currentUser.getRole().equals(ADMIN)) {
             System.out.println("Access denied. Only admins can access this menu.");
             return;
         }
@@ -246,7 +253,9 @@ public class ConsoleApp {
         if (users.isEmpty()) {
             System.out.println("No users found.");
         } else {
-            users.forEach(user -> System.out.println(user.getName() + " - " + user.getEmail()));
+           users.forEach((email, user) -> {
+                System.out.println(email  + ": " + user.getName());
+            });
         }
     }
 
@@ -264,7 +273,9 @@ public class ConsoleApp {
         if (habits.isEmpty()) {
             System.out.println("No habits found for this user.");
         } else {
-            habits.forEach(habit -> System.out.println(habit.getTitle() + ": " + habit.getDescription()));
+            habits.forEach((title, habit) -> {
+                System.out.println(title + ": " + habit.getDescription());
+            });
         }
     }
 

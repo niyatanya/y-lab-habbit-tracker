@@ -5,29 +5,19 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.Objects;
 
 @Getter
 @Setter
 @AllArgsConstructor
 public class HabitRecord {
+    private Long id;
     private LocalDate date;
     private boolean completed;
+    private Long habitId;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        HabitRecord that = (HabitRecord) o;
-        return completed == that.completed && Objects.equals(date, that.date);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(date, completed);
+    public HabitRecord(LocalDate date, boolean completed, Long habitId) {
+        this.date = date;
+        this.completed = completed;
+        this.habitId = habitId;
     }
 }

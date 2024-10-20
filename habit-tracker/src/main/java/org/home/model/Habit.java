@@ -1,23 +1,23 @@
 package org.home.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
-
 @Getter
 @Setter
+@AllArgsConstructor
 public class Habit {
+    private Long id;
     private String title;
     private String description;
     private Frequency frequency;
-    private Map<LocalDate, HabitRecord> habitRecords = new HashMap<>();
+    private Long userId;
 
-    public Habit(String title, String description, Frequency frequency) {
+    public Habit(String title, String description, Frequency frequency, Long userId) {
         this.title = title;
         this.description = description;
         this.frequency = frequency;
+        this.userId = userId;
     }
 }

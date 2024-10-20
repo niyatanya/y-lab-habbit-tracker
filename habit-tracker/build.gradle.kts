@@ -22,6 +22,9 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.assertj:assertj-core:3.22.0")
+    testImplementation("org.testcontainers:testcontainers:1.19.0")
+    testImplementation("org.testcontainers:junit-jupiter:1.19.0")
+    testImplementation("org.testcontainers:postgresql:1.19.0")
     implementation("org.postgresql:postgresql:42.7.2")
     implementation("org.liquibase:liquibase-core:4.24.0")
 }
