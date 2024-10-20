@@ -13,14 +13,27 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * The {@code UserRepository} class provides methods for managing user data in the database.
+ */
 public class UserRepository {
 
     private static DBConnectionProvider connectionProvider;
 
+    /**
+     * Constructs a new {@code UserRepository} with the provided database connection provider.
+     *
+     * @param connectionProvider the {@link DBConnectionProvider} used to establish database connections
+     */
     public UserRepository(DBConnectionProvider connectionProvider) {
         UserRepository.connectionProvider = connectionProvider;
     }
 
+    /**
+     * Retrieves all users from the database.
+     *
+     * @return a map of user emails to {@link User} objects
+     */
     public static Map<String, User> getEntities() {
         String sql = "SELECT * FROM ylab_schema.users";
         try (Connection conn = connectionProvider.getConnection();
@@ -39,6 +52,11 @@ public class UserRepository {
         return new HashMap<>();
     }
 
+    /**
+     * Saves a new user to the database.
+     *
+     * @param user the {@link User} to be saved
+     */
     public static void save(User user) {
         String sql = "INSERT INTO ylab_schema.users (name, email, password, role) VALUES (?, ?, ?, ?::ROLE)";
         try (Connection conn = connectionProvider.getConnection();
@@ -57,6 +75,12 @@ public class UserRepository {
         }
     }
 
+    /**
+     * Finds a user by their email address.
+     *
+     * @param email the email address of the user to find
+     * @return an {@link Optional} containing the {@link User} if found, or an empty {@link Optional}
+     */
     public static Optional<User> findByEmail(String email) {
         String sql = "SELECT * FROM ylab_schema.users WHERE email = ?";
         try (Connection conn = connectionProvider.getConnection();
@@ -72,6 +96,12 @@ public class UserRepository {
         return Optional.empty();
     }
 
+    /**
+     * Checks if an email is already registered in the database.
+     *
+     * @param email the email address to check
+     * @return {@code true} if the email is already registered; {@code false} otherwise
+     */
     public static boolean emailIsAlreadyRegistered(String email) {
         String sql = "SELECT * FROM ylab_schema.users WHERE email = ?";
         try (Connection conn = connectionProvider.getConnection();
@@ -87,6 +117,12 @@ public class UserRepository {
         return false;
     }
 
+    /**
+     * Updates an existing user in the database.
+     *
+     * @param user the {@link User} to update
+     * @return {@code true} if the update was successful; {@code false} otherwise
+     */
     public static boolean update(User user) {
         String sql = "UPDATE ylab_schema.users SET name = ?, email = ?, password = ?, is_blocked = ? WHERE id = ?";
         try (Connection conn = connectionProvider.getConnection();
@@ -105,6 +141,12 @@ public class UserRepository {
         }
     }
 
+    /**
+     * Deletes a user from the database.
+     *
+     * @param user the {@link User} to delete
+     * @return {@code true} if the deletion was successful; {@code false} otherwise
+     */
     public static boolean delete(User user) {
         String sql = "DELETE FROM ylab_schema.users WHERE email = ?";
         try (Connection conn = connectionProvider.getConnection();

@@ -10,8 +10,20 @@ import java.util.Optional;
 
 import static org.home.model.Role.ADMIN;
 
+/**
+ * The {@code UserService} class provides methods for user management operations.
+ */
 public class UserService {
 
+    /**
+     * Registers a new user with given parameters.
+     *
+     * @param name     the name of the new user
+     * @param email    the email of the new user
+     * @param password the password of the new user
+     * @return the newly created {@link User} if registration is successful;
+     * returns null if the email is already registered
+     */
     public User register(String name, String email, String password) {
         if (UserRepository.emailIsAlreadyRegistered(email)) {
             return null;
@@ -22,6 +34,14 @@ public class UserService {
         return newUser;
     }
 
+    /**
+     * Logs in a user with the provided email and password.
+     *
+     * @param email    the email of the user for log in
+     * @param password the password of the user for log in
+     * @return the logged-in {@link User} if successful;
+     * returns null if the user is not found, blocked, or if the password is incorrect
+     */
     public User login(String email, String password) {
         Optional<User> maybeUser = UserRepository.findByEmail(email);
 
@@ -39,6 +59,14 @@ public class UserService {
         return null;
     }
 
+    /**
+     * Edits the profile of a user.
+     *
+     * @param user        the {@link User} whose profile is to be edited
+     * @param newName     the new name for the user
+     * @param newEmail    the new email for the user
+     * @param newPassword  the new password for the user
+     */
     public void editProfile(User user, String newName, String newEmail, String newPassword) {
         if (!user.getEmail().equals(newEmail) && UserRepository.emailIsAlreadyRegistered(newEmail)) {
             return;
@@ -50,6 +78,11 @@ public class UserService {
         UserRepository.update(user);
     }
 
+    /**
+     * Deletes a user account.
+     *
+     * @param user the {@link User} to be deleted
+     */
     public void deleteUser(User user) {
         if (user.getRole().equals(ADMIN)) {
             System.out.println("Cannot delete an admin user.");
@@ -58,14 +91,31 @@ public class UserService {
         }
     }
 
+    /**
+     * Retrieves all users in the system.
+     *
+     * @return a map of all {@link User} entities
+     */
     public Map<String, User> getAllUsers() {
         return new HashMap<>(UserRepository.getEntities());
     }
 
+    /**
+     * Finds a user by their email address.
+     *
+     * @param email the email of the user to find
+     * @return the found {@link User} if they exist
+     */
     public User findUserByEmail(String email) {
         return UserRepository.findByEmail(email).orElseThrow();
     }
 
+    /**
+     * Blocks a user account.
+     *
+     * @param user the {@link User} to be blocked
+     * @return a message indicating the result of the operation
+     */
     public String blockUser(User user) {
         if (user.isBlocked()) {
             return "User is already blocked.";
@@ -78,6 +128,12 @@ public class UserService {
         }
     }
 
+    /**
+     * Unblocks a user account.
+     *
+     * @param user the {@link User} to be unblocked
+     * @return a message indicating the result of the operation
+     */
     public String unblockUser(User user) {
         if (!user.isBlocked()) {
             return "User is already unblocked.";

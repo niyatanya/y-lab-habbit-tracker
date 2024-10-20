@@ -15,6 +15,12 @@ import java.util.Scanner;
 
 import static org.home.model.Role.ADMIN;
 
+/**
+ * The {@code ConsoleApp} class represents a console-based application for managing
+ * users, habits, habit records, and statistics. It provides a main loop to interact
+ * with the user, allowing them to log in and navigate through different features
+ * like managing habits and tracking progress.
+ */
 @NoArgsConstructor
 public class ConsoleApp {
     private static final UserService USER_SERVICE = new UserService();
@@ -24,6 +30,12 @@ public class ConsoleApp {
     private static User currentUser = null;
     private static final Scanner SCANNER = new Scanner(System.in);
 
+    /**
+     * Starts the application and show menus to the user.
+     * <p>
+     * If no user is logged in, the login menu is displayed. Once a user logs in,
+     * the main menu is shown where the user can manage their habits and view statistics.
+     */
     public static void run() {
         while (true) {
             if (currentUser == null) {

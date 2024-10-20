@@ -14,13 +14,27 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * The {@code HabitRepository} class provides methods to manage habits in the database.
+ */
 public class HabitRepository {
     private static DBConnectionProvider connectionProvider;
 
+    /**
+     * Constructs a new {@code HabitRepository} with the provided database connection provider.
+     *
+     * @param connectionProvider the {@link DBConnectionProvider} used to establish database connections
+     */
     public HabitRepository(DBConnectionProvider connectionProvider) {
         HabitRepository.connectionProvider = connectionProvider;
     }
 
+    /**
+     * Retrieves all habits associated with a specific user.
+     *
+     * @param user the {@link User} for whom to retrieve habits
+     * @return a map of habit titles to {@link Habit} objects for the specified user
+     */
     public static Map<String, Habit> getAllUserHabits(User user) {
         String sql = "SELECT * FROM ylab_schema.habits WHERE user_id = ?";
         try (Connection conn = connectionProvider.getConnection();
@@ -40,6 +54,11 @@ public class HabitRepository {
         return new HashMap<>();
     }
 
+    /**
+     * Saves a new habit to the database.
+     *
+     * @param habit the {@link Habit} to be saved
+     */
     public static void save(Habit habit) {
         String sql = "INSERT INTO ylab_schema.habits (title, description, frequency, user_id) VALUES"
                 + "(?, ?, ?::FREQUENCY, ?)";
@@ -60,6 +79,13 @@ public class HabitRepository {
         }
     }
 
+    /**
+     * Checks if a habit exists for a specific user with the given title.
+     *
+     * @param userId the ID of the user
+     * @param title  the title of the habit to check
+     * @return {@code true} if the habit exists; {@code false} otherwise
+     */
     public static boolean habitExists(Long userId, String title) {
         String sql = "SELECT * FROM ylab_schema.habits WHERE user_id = ? AND title = ?";
         try (Connection conn = connectionProvider.getConnection();
@@ -76,6 +102,13 @@ public class HabitRepository {
         return false;
     }
 
+    /**
+     * Finds a habit by its title and associated user ID.
+     *
+     * @param title  the title of the habit
+     * @param userId the ID of the associated user
+     * @return an {@link Optional} containing the {@link Habit} if found, or an empty {@link Optional}
+     */
     public static Optional<Habit> findByTitleAndUserId(String title, Long userId) {
         String sql = "SELECT * FROM ylab_schema.habits WHERE title = ? AND user_id = ?";
         try (Connection conn = connectionProvider.getConnection();
@@ -92,6 +125,12 @@ public class HabitRepository {
         return Optional.empty();
     }
 
+    /**
+     * Updates an existing habit in the database.
+     *
+     * @param habit the {@link Habit} to update
+     * @return {@code true} if the update was successful; {@code false} otherwise
+     */
     public static boolean update(Habit habit) {
         String sql = "UPDATE ylab_schema.habits SET title = ?, description = ?, frequency = ?::FREQUENCY WHERE id = ?";
         try (Connection conn = connectionProvider.getConnection();
@@ -109,6 +148,12 @@ public class HabitRepository {
         }
     }
 
+    /**
+     * Deletes a habit from the database.
+     *
+     * @param habit the {@link Habit} to delete
+     * @return {@code true} if the deletion was successful; {@code false} otherwise
+     */
     public static boolean delete(Habit habit) {
         String sql = "DELETE FROM ylab_schema.habits WHERE id = ?";
         try (Connection conn = connectionProvider.getConnection();

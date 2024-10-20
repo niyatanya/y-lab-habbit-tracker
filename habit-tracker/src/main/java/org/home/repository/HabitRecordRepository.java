@@ -15,14 +15,28 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * The {@code HabitRecordRepository} class provides methods to manage habit records in the database.
+ */
 public class HabitRecordRepository {
 
     private static DBConnectionProvider connectionProvider;
 
+    /**
+     * Constructs a new {@code HabitRecordRepository} with the provided database connection provider.
+     *
+     * @param connectionProvider the {@link DBConnectionProvider} used to establish database connections
+     */
     public HabitRecordRepository(DBConnectionProvider connectionProvider) {
         HabitRecordRepository.connectionProvider = connectionProvider;
     }
 
+    /**
+     * Retrieves all habit records associated with a specific habit.
+     *
+     * @param habit the {@link Habit} for which to retrieve records
+     * @return a map of dates to {@link HabitRecord} objects for the specified habit
+     */
     public static Map<LocalDate, HabitRecord> getAllHabitRecords(Habit habit) {
         String sql = "SELECT * FROM ylab_schema.records WHERE habit_id = ?";
         try (Connection conn = connectionProvider.getConnection();
@@ -42,6 +56,11 @@ public class HabitRecordRepository {
         return new HashMap<>();
     }
 
+    /**
+     * Saves a new habit record to the database.
+     *
+     * @param record the {@link HabitRecord} to be saved
+     */
     public static void save(HabitRecord record) {
         String sql = "INSERT INTO ylab_schema.records (date, completed, habit_id) VALUES (?, ?, ?)";
         try (Connection conn = connectionProvider.getConnection();
@@ -60,6 +79,13 @@ public class HabitRecordRepository {
         }
     }
 
+    /**
+     * Checks if a habit record exists for a specific habit on a given date.
+     *
+     * @param habitId the ID of the habit
+     * @param date    the date to check for the habit record
+     * @return {@code true} if the record exists; {@code false} otherwise
+     */
     public static boolean recordExists(Long habitId, LocalDate date) {
         String sql = "SELECT * FROM ylab_schema.records WHERE habit_id = ? AND date = ?";
         try (Connection conn = connectionProvider.getConnection();
@@ -76,6 +102,13 @@ public class HabitRecordRepository {
         return false;
     }
 
+    /**
+     * Finds a habit record by its date and associated habit ID.
+     *
+     * @param date    the date of the habit record
+     * @param habitId the ID of the associated habit
+     * @return an {@link Optional} containing the {@link HabitRecord} if found, or an empty {@link Optional}
+     */
     public static Optional<HabitRecord> findByDateAndHabitId(LocalDate date, Long habitId) {
         String sql = "SELECT * FROM ylab_schema.records WHERE date = ? AND habit_id = ?";
         try (Connection conn = connectionProvider.getConnection();
@@ -92,6 +125,12 @@ public class HabitRecordRepository {
         return Optional.empty();
     }
 
+    /**
+     * Updates an existing habit record.
+     *
+     * @param record the {@link HabitRecord} to update
+     * @return {@code true} if the update was successful; {@code false} otherwise
+     */
     public static boolean update(HabitRecord record) {
         String sql = "UPDATE ylab_schema.records SET completed = ? WHERE id = ?";
         try (Connection conn = connectionProvider.getConnection();
@@ -107,6 +146,12 @@ public class HabitRecordRepository {
         }
     }
 
+    /**
+     * Deletes a habit record from the database.
+     *
+     * @param record the {@link HabitRecord} to delete
+     * @return {@code true} if the deletion was successful; {@code false} otherwise
+     */
     public static boolean delete(HabitRecord record) {
         String sql = "DELETE FROM ylab_schema.records WHERE id = ?";
         try (Connection conn = connectionProvider.getConnection();

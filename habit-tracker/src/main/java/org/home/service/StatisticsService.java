@@ -16,10 +16,20 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * The {@code StatisticsService} class provides methods to calculate statistics related to user habits.
+ */
 @NoArgsConstructor
 public class StatisticsService {
     private final HabitService habitService = new HabitService();
 
+    /**
+     * Calculates the current streak of habit completions for a given user and habit title.
+     *
+     * @param user       the {@link User} whose habit streak is to be calculated
+     * @param habitTitle the title of the habit
+     * @return the current streak count; returns 0 if the habit is not found or if there are no completions
+     */
     public int getCurrentStreak(User user, String habitTitle) {
         Optional<Habit> maybeHabit = HabitRepository.findByTitleAndUserId(habitTitle, user.getId());
         if (maybeHabit.isEmpty()) {
@@ -54,6 +64,17 @@ public class StatisticsService {
         return streak;
     }
 
+    /**
+     * Calculates the success percentage of habit completions for a given user
+     * and habit title within a specified date range.
+     *
+     * @param user       the {@link User} associated with the habit
+     * @param habitTitle the title of the habit
+     * @param startDate  the start date of the interval
+     * @param endDate    the end date of the interval
+     * @return the success percentage of habit completions; returns 0.0 if the habit is not found
+     * or if the total days is less than or equal to zero
+     */
     public double getSuccessPercentage(User user, String habitTitle, LocalDate startDate, LocalDate endDate) {
         Optional<Habit> maybeHabit = HabitRepository.findByTitleAndUserId(habitTitle, user.getId());
         if (maybeHabit.isEmpty()) {
@@ -80,6 +101,15 @@ public class StatisticsService {
         return (double) completions.size() / totalDays * 100;
     }
 
+    /**
+     * Generates a progress report for a given user and habit title within a specified date range.
+     *
+     * @param user       the {@link User} associated with the habit
+     * @param habitTitle the title of the habit
+     * @param startDate  the start date of the report period
+     * @param endDate    the end date of the report period
+     * @return a {@link String} containing the result of the operation
+     */
     public String generateProgressReport(User user, String habitTitle, LocalDate startDate, LocalDate endDate) {
         Optional<Habit> maybeHabit = HabitRepository.findByTitleAndUserId(habitTitle, user.getId());
         if (maybeHabit.isEmpty()) {
