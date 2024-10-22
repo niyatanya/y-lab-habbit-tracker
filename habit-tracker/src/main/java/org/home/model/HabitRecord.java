@@ -5,25 +5,30 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.Objects;
 
+/**
+ * The {@code HabitRecord} class represents a record of a specific habit on a given date.
+ * It tracks whether the habit was completed on that date and is associated with a habit by its ID.
+ */
 @Getter
 @Setter
 @AllArgsConstructor
 public class HabitRecord {
+    private Long id;
     private LocalDate date;
     private boolean completed;
+    private Long habitId;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        HabitRecord that = (HabitRecord) o;
-        return completed == that.completed && Objects.equals(date, that.date);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(date, completed);
+    /**
+     * Constructs a new {@code HabitRecord} with the specified date, completion status, and habit ID.
+     *
+     * @param date      the date on which the habit was tracked
+     * @param completed whether the habit was completed on that date
+     * @param habitId   the ID of the associated habit
+     */
+    public HabitRecord(LocalDate date, boolean completed, Long habitId) {
+        this.date = date;
+        this.completed = completed;
+        this.habitId = habitId;
     }
 }

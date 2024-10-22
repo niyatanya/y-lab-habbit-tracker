@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd"
+        logicalFilePath="db/changelog.xml">
+
+    <changeSet id="005-insert-data-habits" author="tanya">
+
+        <insert tableName="habits" schemaName="ylab_schema">
+            <column name="id" valueNumeric="1"/>
+            <column name="title" value="Dance training"/>
+            <column name="description" value="Make dance trainings every day to keep fit"/>
+            <column name="frequency" value="DAILY"/>
+            <column name="user_id" valueNumeric="1"/>
+        </insert>
+
+        <insert tableName="habits" schemaName="ylab_schema">
+            <column name="id" valueNumeric="2"/>
+            <column name="title" value="Donate money"/>
+            <column name="description" value="Donate some money for charity"/>
+            <column name="frequency" value="WEEKLY"/>
+            <column name="user_id" valueNumeric="1"/>
+        </insert>
+
+        <insert tableName="habits" schemaName="ylab_schema">
+            <column name="id" valueNumeric="3"/>
+            <column name="title" value="Film in a movie"/>
+            <column name="description" value="Film a new movie every week"/>
+            <column name="frequency" value="WEEKLY"/>
+            <column name="user_id" valueNumeric="2"/>
+        </insert>
+
+        <insert tableName="habits" schemaName="ylab_schema">
+            <column name="id" valueNumeric="4"/>
+            <column name="title" value="Go to gym"/>
+            <column name="description" value="Go to gym every day"/>
+            <column name="frequency" value="DAILY"/>
+            <column name="user_id" valueNumeric="2"/>
+        </insert>
+
+        <insert tableName="habits" schemaName="ylab_schema">
+            <column name="id" valueNumeric="5"/>
+            <column name="title" value="Drink 2 litres of water"/>
+            <column name="description" value="Drink 2 litres of water every day"/>
+            <column name="frequency" value="DAILY"/>
+            <column name="user_id" valueNumeric="3"/>
+        </insert>
+
+        <insert tableName="habits" schemaName="ylab_schema">
+            <column name="id" valueNumeric="6"/>
+            <column name="title" value="Block some users"/>
+            <column name="description" value="Block some annoying users every week"/>
+            <column name="frequency" value="WEEKLY"/>
+            <column name="user_id" valueNumeric="3"/>
+        </insert>
+
+    </changeSet>
+</databaseChangeLog>

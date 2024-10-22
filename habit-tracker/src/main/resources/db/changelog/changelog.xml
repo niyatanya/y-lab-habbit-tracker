@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd"
+        logicalFilePath="db/changelog.xml">
+        <include file="001-create-table.xml" relativeToChangelogFile="true"/>
+        <include file="002-insert-data.xml" relativeToChangelogFile="true"/>
+        <include file="003-insert-data-admin.xml" relativeToChangelogFile="true"/>
+        <include file="004-add-column-userid-habits.xml" relativeToChangelogFile="true"/>
+        <include file="005-insert-data-habits.xml" relativeToChangelogFile="true"/>
+        <include file="006-add-column-habitid-records.xml" relativeToChangelogFile="true"/>
+        <include file="007-drop-data-unique-constraint.xml" relativeToChangelogFile="true"/>
+        <include file="008-insert-data-records.xml" relativeToChangelogFile="true"/>
+        <include file="009-add-sequences-for-ids.xml" relativeToChangelogFile="true"/>
+</databaseChangeLog>

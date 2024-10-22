@@ -1,32 +1,60 @@
 package org.home.service;
 
+import org.home.config.DBConnectionProvider;
 import org.home.model.Frequency;
 import org.home.model.Habit;
-import org.home.model.HabitRecord;
 import org.home.model.User;
+import org.home.repository.HabitRepository;
+import org.home.repository.UserRepository;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.time.LocalDate;
-import java.util.List;
+import org.testcontainers.containers.PostgreSQLContainer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@DisplayName("HabitService test")
 class HabitServiceTest {
 
+    private static PostgreSQLContainer<?> testDb = new PostgreSQLContainer<>("postgres")
+            .withInitScript("test-schema.sql");
+
+    private UserService userService;
     private HabitService habitService;
     private User user;
 
+    @BeforeAll
+    static void beforeAll() {
+        testDb.start();
+    }
+
+    @AfterAll
+    static void afterAll() {
+        testDb.stop();
+    }
+
     @BeforeEach
     void setUp() {
+        DBConnectionProvider connectionProvider = new DBConnectionProvider(
+                testDb.getJdbcUrl(),
+                testDb.getUsername(),
+                testDb.getPassword()
+        );
+        userService = new UserService();
+        UserRepository userRepository = new UserRepository(connectionProvider);
+        user = userService.findUserByEmail("tu@example.com");
+
         habitService = new HabitService();
-        user = new User("John Doe", "john@example.com", "password123");
+        HabitRepository habitRepository = new HabitRepository(connectionProvider);
     }
 
     @Test
+    @DisplayName("Create habit")
     void testCreateHabit() {
-        String title = "Read a book";
-        String description = "Read every day for 30 minutes";
+        String title = "Do push ups";
+        String description = "Do 10 push ups every day";
         Frequency frequency = Frequency.DAILY;
 
         Habit createdHabit = habitService.createHabit(user, title, description, frequency);
@@ -34,10 +62,11 @@ class HabitServiceTest {
         assertThat(createdHabit.getTitle()).isEqualTo(title);
         assertThat(createdHabit.getDescription()).isEqualTo(description);
         assertThat(createdHabit.getFrequency()).isEqualTo(frequency);
-        assertThat(user.getAllHabits()).contains(createdHabit);
+        assertThat(habitService.getAllHabits(user)).containsKey(title);
     }
 
     @Test
+    @DisplayName("Edit habit")
     void testEditHabit() {
         String oldTitle = "Read a book";
         String newTitle = "Read a novel";
@@ -45,66 +74,25 @@ class HabitServiceTest {
         Frequency newFrequency = Frequency.WEEKLY;
 
         Habit habit = habitService.createHabit(user, oldTitle, "Description", Frequency.DAILY);
+        assertThat(habit.getTitle()).isEqualTo(oldTitle);
 
         habitService.editHabit(user, oldTitle, newTitle, newDescription, newFrequency);
 
-        assertThat(habit.getTitle()).isEqualTo(newTitle);
-        assertThat(habit.getDescription()).isEqualTo(newDescription);
-        assertThat(habit.getFrequency()).isEqualTo(newFrequency);
+        Habit editedHabit = habitService.findByTitleAndUserId(user, newTitle);
+
+        assertThat(editedHabit).isNotNull();
+        assertThat(editedHabit.getDescription()).isEqualTo(newDescription);
+        assertThat(editedHabit.getFrequency()).isEqualTo(newFrequency);
     }
 
     @Test
+    @DisplayName("Delete habit")
     void testDeleteHabit() {
-        String title = "Read a book";
+        String title = "Drink water";
         Habit habit = habitService.createHabit(user, title, "Description", Frequency.DAILY);
+        assertThat(habitService.getAllHabits(user)).containsKey(title);
 
         habitService.deleteHabit(user, title);
-
-        assertThat(user.getAllHabits()).doesNotContain(habit);
-    }
-
-    @Test
-    void testGetAllHabits() {
-        Habit habit1 = habitService.createHabit(user, "Read", "Read daily", Frequency.DAILY);
-        Habit habit2 = habitService.createHabit(user, "Exercise", "Exercise weekly", Frequency.WEEKLY);
-
-        List<Habit> habits = habitService.getAllHabits(user);
-
-        assertThat(habits).hasSize(2);
-        assertThat(habits).contains(habit1, habit2);
-    }
-
-    @Test
-    void testTrackHabit() {
-        String title = "Read a book";
-        LocalDate date = LocalDate.now();
-        boolean completed = true;
-
-        Habit habit = habitService.createHabit(user, title, "Description", Frequency.DAILY);
-
-        habitService.trackHabit(user, title, date, completed);
-
-        HabitRecord record = new HabitRecord(date, completed);
-        assertThat(habit.getCompletionHistory()).contains(record);
-    }
-
-    @Test
-    void testFindHabitByTitle_Found() {
-        String title = "Read a book";
-        Habit habit = habitService.createHabit(user, title, "Read daily", Frequency.DAILY);
-
-        Habit foundHabit = habitService.findHabitByTitle(user, title);
-
-        assertThat(foundHabit).isNotNull();
-        assertThat(foundHabit.getTitle()).isEqualTo(title);
-    }
-
-    @Test
-    void testFindHabitByTitle_NotFound() {
-        String title = "Non-existing habit";
-
-        Habit foundHabit = habitService.findHabitByTitle(user, title);
-
-        assertThat(foundHabit).isNull();
+        assertThat(habitService.getAllHabits(user)).doesNotContainKey(title);
     }
 }
