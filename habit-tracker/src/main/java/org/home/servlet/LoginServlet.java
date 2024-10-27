@@ -12,6 +12,7 @@ import org.home.dto.LoginOutputDTO;
 import org.home.model.User;
 import org.home.service.AuthService;
 import org.home.service.UserService;
+import org.home.validation.LoginInputDTOValidator;
 
 import java.io.IOException;
 import java.util.Map;
@@ -36,6 +37,7 @@ public class LoginServlet extends HttpServlet {
         resp.setCharacterEncoding("UTF-8");
 
         LoginInputDTO inputDTO = objectMapper.readValue(req.getReader(), LoginInputDTO.class);
+        LoginInputDTOValidator.validate(inputDTO);
 
         User user = userService.findUserByEmail(inputDTO.getEmail());
         if (user != null) {

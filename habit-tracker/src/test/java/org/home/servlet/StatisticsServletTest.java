@@ -69,7 +69,7 @@ public class StatisticsServletTest {
 
         Map<String, Map<String, String>> responseMap = Map.of(
                 "Progress Report for Habit: Exercise",
-                Map.of("Period: ", "2023-01-01 to 2023-12-31",
+                Map.of("Period: ", "2024-01-01 to 2024-12-31",
                         "Total intervals: ", "365",
                         "Successful intervals: ", "200",
                         "Success rate: ", "54.79%",

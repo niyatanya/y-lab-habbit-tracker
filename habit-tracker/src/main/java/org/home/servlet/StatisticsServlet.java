@@ -11,6 +11,7 @@ import org.home.annotations.LoggableUserAction;
 import org.home.dto.StatisticsInputDTO;
 import org.home.service.AuthService;
 import org.home.service.StatisticsService;
+import org.home.validation.StatisticsInputDTOValidator;
 
 import java.io.IOException;
 
@@ -48,6 +49,7 @@ public class StatisticsServlet extends HttpServlet {
 
         try {
             StatisticsInputDTO input = objectMapper.readValue(req.getReader(), StatisticsInputDTO.class);
+            StatisticsInputDTOValidator.validate(input);
             Map<String, Map<String, String>> result = statisticsService.generateProgressReport(input);
             Map<String, String> innerMap = result.get(String.format(
                     "Progress Report for Habit: %s", input.getHabitTitle()));

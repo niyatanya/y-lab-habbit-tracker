@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.util.Map;
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.home.validation.HabitRecordDTOValidator;
 
 import static org.home.model.Role.ADMIN;
 
@@ -71,6 +72,7 @@ public class HabitRecordServlet extends HttpServlet {
 
         try {
             HabitRecordDTO recordDTO = objectMapper.readValue(req.getReader(), HabitRecordDTO.class);
+            HabitRecordDTOValidator.validate(recordDTO);
             String habitTitle = req.getPathInfo().split("/")[2];
             HabitRecordDTO newRecordDTO = recordService.createRecord(email, habitTitle, recordDTO);
 
@@ -106,6 +108,7 @@ public class HabitRecordServlet extends HttpServlet {
         try {
             String habitTitle = req.getPathInfo().split("/")[2];
             HabitRecordDTO recordDTOToUpdate = objectMapper.readValue(req.getReader(), HabitRecordDTO.class);
+            HabitRecordDTOValidator.validate(recordDTOToUpdate);
             HabitRecordDTO updatedRecordDTO = recordService.editRecord(email, habitTitle, recordDTOToUpdate);
 
             resp.setContentType("application/json");
@@ -140,6 +143,7 @@ public class HabitRecordServlet extends HttpServlet {
         try {
             String habitTitle = req.getPathInfo().split("/")[2];
             HabitRecordDTO recordDTOToDelete = objectMapper.readValue(req.getReader(), HabitRecordDTO.class);
+            HabitRecordDTOValidator.validate(recordDTOToDelete);
 
             resp.setContentType("application/json");
             resp.setCharacterEncoding("UTF-8");

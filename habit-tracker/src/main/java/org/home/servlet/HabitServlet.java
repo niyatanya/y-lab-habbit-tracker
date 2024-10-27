@@ -10,6 +10,7 @@ import org.home.annotations.LoggableUserAction;
 import org.home.dto.HabitDTO;
 import org.home.service.AuthService;
 import org.home.service.HabitService;
+import org.home.validation.HabitDTOValidator;
 
 import java.io.IOException;
 import java.util.Map;
@@ -67,6 +68,7 @@ public class HabitServlet extends HttpServlet {
 
         try {
             HabitDTO habitDTO = objectMapper.readValue(req.getReader(), HabitDTO.class);
+            HabitDTOValidator.validate(habitDTO);
             HabitDTO newHabitDTO = habitService.createHabit(email, habitDTO);
 
             resp.setContentType("application/json");
@@ -101,6 +103,7 @@ public class HabitServlet extends HttpServlet {
         try {
             String oldTitle = req.getPathInfo().split("/")[2];
             HabitDTO habitDTOToUpdate = objectMapper.readValue(req.getReader(), HabitDTO.class);
+            HabitDTOValidator.validate(habitDTOToUpdate);
             HabitDTO updatedHabitDTO = habitService.editHabit(email, oldTitle, habitDTOToUpdate);
 
             resp.setContentType("application/json");

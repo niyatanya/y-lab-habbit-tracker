@@ -11,6 +11,7 @@ import org.home.dto.UserCreateDTO;
 import org.home.dto.UserDTO;
 import org.home.service.AuthService;
 import org.home.service.UserService;
+import org.home.validation.UserCreateDTOValidator;
 
 import java.io.IOException;
 import java.util.List;
@@ -68,6 +69,7 @@ public class UserServlet extends HttpServlet {
 
         try {
             UserCreateDTO userCreateDTO = objectMapper.readValue(req.getReader(), UserCreateDTO.class);
+            UserCreateDTOValidator.validate(userCreateDTO);
             UserDTO updatedUserDTO = userService.editProfile(email, userCreateDTO);
 
             resp.setContentType("application/json");

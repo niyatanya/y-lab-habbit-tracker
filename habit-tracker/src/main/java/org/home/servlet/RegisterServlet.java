@@ -10,6 +10,7 @@ import org.home.annotations.LoggableUserAction;
 import org.home.dto.UserCreateDTO;
 import org.home.dto.UserDTO;
 import org.home.service.UserService;
+import org.home.validation.UserCreateDTOValidator;
 
 import java.io.IOException;
 import java.util.Map;
@@ -30,6 +31,7 @@ public class RegisterServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             UserCreateDTO userCreateDTO = objectMapper.readValue(req.getReader(), UserCreateDTO.class);
+            UserCreateDTOValidator.validate(userCreateDTO);
             UserDTO newUserDTO = userService.register(userCreateDTO);
 
             resp.setContentType("application/json");
