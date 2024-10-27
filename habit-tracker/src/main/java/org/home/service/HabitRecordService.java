@@ -1,76 +1,86 @@
 package org.home.service;
 
+import org.home.dto.HabitRecordDTO;
+import org.home.mapper.HabitRecordMapper;
 import org.home.model.Habit;
 import org.home.model.HabitRecord;
+import org.home.model.User;
 import org.home.repository.HabitRecordRepository;
+import org.home.repository.HabitRepository;
+import org.home.repository.UserRepository;
+import org.mapstruct.factory.Mappers;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * The {@code HabitRecordService} class provides methods for managing habit records.
  */
 public class HabitRecordService {
 
+    private static final HabitRecordMapper MAPPER = Mappers.getMapper(HabitRecordMapper.class);
+
     /**
      * Creates a new habit record for a specified habit on a given date.
-     *
-     * @param habit    the {@link Habit} associated with the record
-     * @param date     the date of the habit record
-     * @param completed whether the habit was completed on that date
-     * @return the created {@link HabitRecord}, or {@code null} if a record for that date already exists
      */
-    public HabitRecord createRecord(Habit habit, LocalDate date, boolean completed) {
-        if (HabitRecordRepository.recordExists(habit.getId(), date)) {
+    public HabitRecordDTO createRecord(String email, String habitTitle, HabitRecordDTO recordDTO) {
+        User user = UserRepository.findByEmail(email).orElseThrow();
+        Habit habit = HabitRepository.findByTitleAndUserId(habitTitle, user.getId()).orElseThrow();
+        if (recordExists(habit.getId(), recordDTO.getDate())) {
             return null;
         }
-        HabitRecord record = new HabitRecord(date, completed, habit.getId());
+        HabitRecord record = MAPPER.toEntity(recordDTO);
+        record.setHabitId(habit.getId());
         HabitRecordRepository.save(record);
-        return record;
+        return MAPPER.toDTO(record);
     }
 
     /**
      * Edits the completion status of an existing habit record for a specific habit on a given date.
-     *
-     * @param habit         the {@link Habit} associated with the record
-     * @param oldCompleted  the old completion status of the record
-     * @param newCompleted  the new completion status to set
-     * @param date          the date of the habit record
      */
-    public void editRecord(Habit habit, boolean oldCompleted, boolean newCompleted, LocalDate date) {
-        if (oldCompleted == newCompleted) {
-            return;
+    public HabitRecordDTO editRecord(String email, String habitTitle, HabitRecordDTO recordDTO) {
+        User user = UserRepository.findByEmail(email).orElseThrow();
+        Habit habit = HabitRepository.findByTitleAndUserId(habitTitle, user.getId()).orElseThrow();
+        HabitRecord record = HabitRecordRepository.findByDateAndHabitId(
+                recordDTO.getDate(), habit.getId()).orElseThrow();
+        if (record.isCompleted() == recordDTO.isCompleted()) {
+            return null;
         }
 
-        Optional<HabitRecord> maybeRecord = HabitRecordRepository.findByDateAndHabitId(date, habit.getId());
-        if (maybeRecord.isPresent()) {
-            HabitRecord record = maybeRecord.get();
-            record.setCompleted(newCompleted);
-            HabitRecordRepository.update(record);
-        }
+        record.setCompleted(recordDTO.isCompleted());
+        HabitRecordRepository.update(record);
+        return MAPPER.toDTO(record);
     }
 
     /**
      * Deletes a habit record for a specific habit on a given date.
-     *
-     * @param habit the {@link Habit} associated with the record
-     * @param date  the date of the habit record to delete
      */
-    public void deleteRecord(Habit habit, LocalDate date) {
-        Optional<HabitRecord> maybeRecord = HabitRecordRepository.findByDateAndHabitId(date, habit.getId());
-        maybeRecord.ifPresent(HabitRecordRepository::delete);
+    public boolean deleteRecord(String email, String habitTitle, HabitRecordDTO recordDTO) {
+        User user = UserRepository.findByEmail(email).orElseThrow();
+        Habit habit = HabitRepository.findByTitleAndUserId(habitTitle, user.getId()).orElseThrow();
+        Optional<HabitRecord> maybeRecord = HabitRecordRepository.findByDateAndHabitId(
+                recordDTO.getDate(), habit.getId());
+        if (maybeRecord.isPresent()) {
+            HabitRecordRepository.delete(maybeRecord.get());
+            return true;
+        }
+        return false;
     }
 
     /**
      * Retrieves all habit records associated with a specified habit.
-     *
-     * @param habit the {@link Habit} for which to retrieve records
-     * @return a map of dates to {@link HabitRecord} objects
      */
-    public Map<LocalDate, HabitRecord> getAllRecords(Habit habit) {
-        return new HashMap<>(HabitRecordRepository.getAllHabitRecords(habit));
+    public Map<LocalDate, HabitRecordDTO> getAllRecords(String email, String habitTitle) {
+        User user = UserRepository.findByEmail(email).orElseThrow();
+        Habit habit = HabitRepository.findByTitleAndUserId(habitTitle, user.getId()).orElseThrow();
+        Map<LocalDate, HabitRecord> recordMap = HabitRecordRepository.getAllHabitRecords(habit);
+        return recordMap.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> MAPPER.toDTO(entry.getValue())
+                ));
     }
 
     /**

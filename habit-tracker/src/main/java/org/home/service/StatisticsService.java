@@ -1,12 +1,14 @@
 package org.home.service;
 
 import lombok.NoArgsConstructor;
+import org.home.dto.StatisticsInputDTO;
 import org.home.model.Habit;
 import org.home.model.HabitRecord;
 import org.home.model.User;
 import org.home.model.Frequency;
 import org.home.repository.HabitRecordRepository;
 import org.home.repository.HabitRepository;
+import org.home.repository.UserRepository;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -104,21 +106,25 @@ public class StatisticsService {
     /**
      * Generates a progress report for a given user and habit title within a specified date range.
      *
-     * @param user       the {@link User} associated with the habit
-     * @param habitTitle the title of the habit
-     * @param startDate  the start date of the report period
-     * @param endDate    the end date of the report period
      * @return a {@link String} containing the result of the operation
      */
-    public String generateProgressReport(User user, String habitTitle, LocalDate startDate, LocalDate endDate) {
+    public Map<String, Map<String, String>> generateProgressReport(StatisticsInputDTO inputDTO) {
+        User user = UserRepository.findByEmail(inputDTO.getEmail()).orElseThrow();
+        String habitTitle = inputDTO.getHabitTitle();
         Optional<Habit> maybeHabit = HabitRepository.findByTitleAndUserId(habitTitle, user.getId());
         if (maybeHabit.isEmpty()) {
-            return "Habit not found.";
+            return Map.of(
+                    String.format("Progress Report for Habit: %s", habitTitle),
+                    Map.of("Error: ", "Habit not fount")
+                    );
         }
 
         Habit habit = maybeHabit.get();
         List<HabitRecord> completions;
         long totalDays;
+
+        LocalDate startDate = inputDTO.getStartDate();
+        LocalDate endDate = inputDTO.getEndDate();
 
         if (habit.getFrequency() == Frequency.DAILY) {
             completions = filterCompletionsByDate(habit, startDate, endDate);
@@ -132,13 +138,15 @@ public class StatisticsService {
         double successRate = (double) successfulDays / totalDays * 100;
         int currentStreak = getCurrentStreak(user, habitTitle);
 
-        return String.format("Progress Report for Habit: %s%n"
-                        + "Period: %s to %s%n"
-                        + "Total intervals: %d%n"
-                        + "Successful intervals: %d%n"
-                        + "Success rate: %.2f%%%n"
-                        + "Current streak: %d intervals",
-                habitTitle, startDate, endDate, totalDays, successfulDays, successRate, currentStreak);
+        Map<String, Map<String, String>> result = Map.of(
+                String.format("Progress Report for Habit: %s", habitTitle),
+                Map.of("Period: ", String.format("%s to %s", startDate, endDate),
+                        "Total intervals: ", String.valueOf(totalDays),
+                        "Successful intervals: ", String.valueOf(successfulDays),
+                        "Success rate: ", String.format("%.2f%%", successRate),
+                        "Current streak: ", String.format("%d intervals", currentStreak)
+                ));
+        return result;
     }
 
     private List<HabitRecord> filterCompletionsByDate(Habit habit, LocalDate startDate, LocalDate endDate) {

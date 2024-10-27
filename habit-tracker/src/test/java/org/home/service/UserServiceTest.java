@@ -1,6 +1,8 @@
 package org.home.service;
 
 import org.home.config.DBConnectionProvider;
+import org.home.dto.UserCreateDTO;
+import org.home.dto.UserDTO;
 import org.home.model.User;
 import org.home.repository.UserRepository;
 import org.junit.jupiter.api.AfterAll;
@@ -44,12 +46,12 @@ class UserServiceTest {
     @Test
     @DisplayName("Register new user with correct credentials")
     void shouldRegisterNewUserSuccessfully() {
-        User user = userService.register("Catharina Mane", "kate@example.com", "password123");
+        UserDTO user = userService.register(
+                new UserCreateDTO("Catharina Mane", "kate@example.com", "password123"));
 
         assertThat(user).isNotNull();
         assertThat(user.getName()).isEqualTo("Catharina Mane");
         assertThat(user.getEmail()).isEqualTo("kate@example.com");
-        assertThat(user.getPassword()).isEqualTo("password123");
         assertThat(userService.getAllUsers()).containsKey("kate@example.com");
     }
 
@@ -57,9 +59,10 @@ class UserServiceTest {
     @DisplayName("Fail to register new user with duplicate email")
     void shouldNotRegisterUserWithDuplicateEmail() {
         int initUsersCount = userService.getAllUsers().size();
-        userService.register("John Doe", "john@example.com", "password123");
+        userService.register(new UserCreateDTO("John Doe", "john@example.com", "password123"));
 
-        User duplicateUser = userService.register("Jane Doe", "john@example.com", "password456");
+        UserDTO duplicateUser = userService.register(
+                new UserCreateDTO("Jane Doe", "john@example.com", "password123"));
         assertThat(duplicateUser).isNull();
 
         int usersCountAfterOperation = userService.getAllUsers().size();
@@ -69,7 +72,7 @@ class UserServiceTest {
     @Test
     @DisplayName("Login user with correct credentials")
     void shouldLoginUserSuccessfully() {
-        userService.register("John Doe", "john@example.com", "password123");
+        userService.register(new UserCreateDTO("John Doe", "john@example.com", "password123"));
 
         User loggedInUser = userService.login("john@example.com", "password123");
 
@@ -81,7 +84,7 @@ class UserServiceTest {
     @Test
     @DisplayName("Fail to login a user with incorrect password")
     void shouldNotLoginWithIncorrectPassword() {
-        userService.register("John Doe", "john@example.com", "password123");
+        userService.register(new UserCreateDTO("John Doe", "john@example.com", "password123"));
 
         User loggedInUser = userService.login("john@example.com", "wrongpassword");
         assertThat(loggedInUser).isNull();
@@ -90,23 +93,28 @@ class UserServiceTest {
     @Test
     @DisplayName("Edit user profile with valid data")
     void shouldEditProfileSuccessfully() {
-        User user = userService.register("Jimmy Handriks", "jymmy@example.com", "password123");
-
+        userService.register(
+                new UserCreateDTO("Jimmy Handriks", "jymmy@example.com", "password123"));
         assertThat(userService.getAllUsers()).containsKey("jymmy@example.com");
-        userService.editProfile(user, "Johnny", "johnny@example.com", "newpassword123");
 
-        assertThat(user.getName()).isEqualTo("Johnny");
-        assertThat(user.getEmail()).isEqualTo("johnny@example.com");
-        assertThat(user.getPassword()).isEqualTo("newpassword123");
+        UserDTO updatedUser = userService.editProfile("jymmy@example.com",
+                new UserCreateDTO("Johnny", "johnny@example.com", "newpassword123"));
+
+        assertThat(updatedUser.getName()).isEqualTo("Johnny");
+        assertThat(updatedUser.getEmail()).isEqualTo("johnny@example.com");
+        assertThat(UserRepository.findByEmail("johnny@example.com").get().getPassword())
+                .isEqualTo("newpassword123");
     }
 
     @Test
     @DisplayName("Edit user profile with existing email")
     void shouldNotEditProfileWithExistingEmail() {
-        User user1 = userService.register("Bella Ostin", "bella@example.com", "password123");
-        userService.register("Jane Smith", "jane@example.com", "password456");
+        UserDTO user1 = userService.register(
+                new UserCreateDTO("Bella Ostin", "bella@example.com", "password123"));
+        userService.register(new UserCreateDTO("Jane Smith", "jane@example.com", "password456"));
 
-        userService.editProfile(user1, "John Updated", "jane@example.com", "newpassword");
+        userService.editProfile("bella@example.com",
+                new UserCreateDTO("John Updated", "jane@example.com", "newpassword"));
 
         assertThat(user1.getEmail()).isEqualTo("bella@example.com");
     }
@@ -114,10 +122,11 @@ class UserServiceTest {
     @Test
     @DisplayName("Delete user")
     void shouldDeleteUserSuccessfully() {
-        User user = userService.register("Samantha Smith", "samsam@example.com", "password123");
+        UserDTO user = userService.register(
+                new UserCreateDTO("Samantha Smith", "samsam@example.com", "password123"));
         assertThat(userService.getAllUsers()).containsKey("samsam@example.com");
 
-        userService.deleteUser(user);
+        userService.deleteUser(user.getEmail());
         assertThat(userService.getAllUsers()).doesNotContainKey("samsam@example.com");
     }
 }

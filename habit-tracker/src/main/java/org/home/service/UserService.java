@@ -1,37 +1,41 @@
 package org.home.service;
 
-import org.home.model.Role;
+import org.home.dto.UserCreateDTO;
+import org.home.dto.UserDTO;
+import org.home.mapper.UserMapper;
 import org.home.model.User;
 import org.home.repository.UserRepository;
+import org.mapstruct.factory.Mappers;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.home.model.Role.ADMIN;
+import static org.home.model.Role.USER;
 
 /**
  * The {@code UserService} class provides methods for user management operations.
  */
 public class UserService {
 
+    private static final UserMapper MAPPER = Mappers.getMapper(UserMapper.class);
+
     /**
      * Registers a new user with given parameters.
      *
-     * @param name     the name of the new user
-     * @param email    the email of the new user
-     * @param password the password of the new user
      * @return the newly created {@link User} if registration is successful;
      * returns null if the email is already registered
      */
-    public User register(String name, String email, String password) {
-        if (UserRepository.emailIsAlreadyRegistered(email)) {
+    public UserDTO register(UserCreateDTO dto) {
+        if (UserRepository.emailIsAlreadyRegistered(dto.getEmail())) {
             return null;
         }
 
-        User newUser = new User(name, email, password, Role.USER);
+        User newUser = MAPPER.toEntity(dto);
+        newUser.setRole(USER);
         UserRepository.save(newUser);
-        return newUser;
+        return MAPPER.toDTO(newUser);
     }
 
     /**
@@ -62,32 +66,31 @@ public class UserService {
     /**
      * Edits the profile of a user.
      *
-     * @param user        the {@link User} whose profile is to be edited
-     * @param newName     the new name for the user
-     * @param newEmail    the new email for the user
-     * @param newPassword  the new password for the user
      */
-    public void editProfile(User user, String newName, String newEmail, String newPassword) {
-        if (!user.getEmail().equals(newEmail) && UserRepository.emailIsAlreadyRegistered(newEmail)) {
-            return;
+    public UserDTO editProfile(String oldEmail, UserCreateDTO dto) {
+        if (!oldEmail.equals(dto.getEmail()) && UserRepository.emailIsAlreadyRegistered(dto.getEmail())) {
+            return null;
         }
 
-        user.setName(newName);
-        user.setEmail(newEmail);
-        user.setPassword(newPassword);
+        User user = UserRepository.findByEmail(oldEmail).orElseThrow();
+        user.setName(dto.getName());
+        user.setEmail(dto.getEmail());
+        user.setPassword(dto.getPassword());
         UserRepository.update(user);
+        return MAPPER.toDTO(user);
     }
 
     /**
      * Deletes a user account.
      *
-     * @param user the {@link User} to be deleted
      */
-    public void deleteUser(User user) {
+    public boolean deleteUser(String email) {
+        User user = UserRepository.findByEmail(email).orElseThrow();
         if (user.getRole().equals(ADMIN)) {
-            System.out.println("Cannot delete an admin user.");
+            return false;
         } else {
             UserRepository.delete(user);
+            return true;
         }
     }
 
@@ -96,8 +99,13 @@ public class UserService {
      *
      * @return a map of all {@link User} entities
      */
-    public Map<String, User> getAllUsers() {
-        return new HashMap<>(UserRepository.getEntities());
+    public Map<String, UserDTO> getAllUsers() {
+        Map<String, User> userMap = UserRepository.getEntities();
+        return userMap.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> MAPPER.toDTO(entry.getValue())
+                ));
     }
 
     /**
@@ -116,15 +124,13 @@ public class UserService {
      * @param user the {@link User} to be blocked
      * @return a message indicating the result of the operation
      */
-    public String blockUser(User user) {
+    public boolean blockUser(User user) {
         if (user.isBlocked()) {
-            return "User is already blocked.";
-        } else if (user.getRole().equals(ADMIN)) {
-            return "Cannot block an admin user.";
+            return false;
         } else {
             user.setBlocked(true);
             UserRepository.update(user);
-            return "User " + user.getName() + " has been blocked.";
+            return true;
         }
     }
 
@@ -134,13 +140,17 @@ public class UserService {
      * @param user the {@link User} to be unblocked
      * @return a message indicating the result of the operation
      */
-    public String unblockUser(User user) {
+    public boolean unblockUser(User user) {
         if (!user.isBlocked()) {
-            return "User is already unblocked.";
+            return false;
         } else {
             user.setBlocked(false);
             UserRepository.update(user);
-            return "User " + user.getName() + " has been unblocked.";
+            return true;
         }
+    }
+
+    public boolean validatePassword(User user, String password) {
+        return user.getPassword().equals(password);
     }
 }
