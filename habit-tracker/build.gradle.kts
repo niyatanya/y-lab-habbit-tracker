@@ -3,6 +3,7 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
     java
+    application
     war
     checkstyle
     id("io.freefair.lombok") version "8.6"
@@ -19,6 +20,10 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+}
+
+application {
+    mainClass.set("org.home.Main")
 }
 
 dependencies {

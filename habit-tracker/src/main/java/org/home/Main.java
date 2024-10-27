@@ -11,16 +11,17 @@ import org.home.repository.UserRepository;
 
 /**
  * The {@code Main} class is the entry point for the application.
- * It initializes the necessary components and starts the application.
+ * It initializes the necessary components and performs database migrations.
  */
 @AllArgsConstructor
 public class Main {
     private ComponentFactory componentFactory;
 
     /**
-     * Runs the application, initializing the necessary components.
+     * Initializes the application by preparing the database connection and creating
+     * the required repositories, and executes database migrations.
      */
-    public void run() {
+    public void initialize() {
         DBConnectionProvider connProvider = componentFactory.prepareConnector();
         UserRepository userRepository = componentFactory.createUserRepository(connProvider);
         HabitRepository habitRepository = componentFactory.createHabitRepository(connProvider);
@@ -34,6 +35,6 @@ public class Main {
     public static void main(String[] args) {
         ComponentFactory factory = new DefaultComponentFactory();
         Main app = new Main(factory);
-        app.run();
+        app.initialize();
     }
 }
