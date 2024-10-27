@@ -1,6 +1,7 @@
 package org.home.service;
 
 import lombok.NoArgsConstructor;
+import org.home.annotations.LoggableUserAction;
 import org.home.dto.StatisticsInputDTO;
 import org.home.model.Habit;
 import org.home.model.HabitRecord;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 /**
  * The {@code StatisticsService} class provides methods to calculate statistics related to user habits.
  */
+@LoggableUserAction
 @NoArgsConstructor
 public class StatisticsService {
     private final HabitService habitService = new HabitService();

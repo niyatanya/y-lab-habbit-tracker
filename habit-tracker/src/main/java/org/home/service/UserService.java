@@ -1,5 +1,6 @@
 package org.home.service;
 
+import org.home.annotations.LoggableUserAction;
 import org.home.dto.UserCreateDTO;
 import org.home.dto.UserDTO;
 import org.home.mapper.UserMapper;
@@ -27,6 +28,7 @@ public class UserService {
      * @return the newly created {@link User} if registration is successful;
      * returns null if the email is already registered
      */
+    @LoggableUserAction
     public UserDTO register(UserCreateDTO dto) {
         if (UserRepository.emailIsAlreadyRegistered(dto.getEmail())) {
             return null;
@@ -46,6 +48,7 @@ public class UserService {
      * @return the logged-in {@link User} if successful;
      * returns null if the user is not found, blocked, or if the password is incorrect
      */
+    @LoggableUserAction
     public User login(String email, String password) {
         Optional<User> maybeUser = UserRepository.findByEmail(email);
 
@@ -67,6 +70,7 @@ public class UserService {
      * Edits the profile of a user.
      *
      */
+    @LoggableUserAction
     public UserDTO editProfile(String oldEmail, UserCreateDTO dto) {
         if (!oldEmail.equals(dto.getEmail()) && UserRepository.emailIsAlreadyRegistered(dto.getEmail())) {
             return null;
@@ -84,6 +88,7 @@ public class UserService {
      * Deletes a user account.
      *
      */
+    @LoggableUserAction
     public boolean deleteUser(String email) {
         User user = UserRepository.findByEmail(email).orElseThrow();
         if (user.getRole().equals(ADMIN)) {
@@ -114,6 +119,7 @@ public class UserService {
      * @param email the email of the user to find
      * @return the found {@link User} if they exist
      */
+    @LoggableUserAction
     public User findUserByEmail(String email) {
         return UserRepository.findByEmail(email).orElseThrow();
     }
@@ -150,6 +156,7 @@ public class UserService {
         }
     }
 
+    @LoggableUserAction
     public boolean validatePassword(User user, String password) {
         return user.getPassword().equals(password);
     }

@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.home.annotations.LoggableUserAction;
 import org.home.dto.HabitDTO;
 import org.home.mapper.HabitMapper;
 import org.home.model.Habit;
@@ -15,6 +16,7 @@ import org.mapstruct.factory.Mappers;
 /**
  * The {@code HabitService} class provides methods for managing habits associated with users.
  */
+@LoggableUserAction
 public class HabitService {
 
     private static final HabitMapper MAPPER = Mappers.getMapper(HabitMapper.class);

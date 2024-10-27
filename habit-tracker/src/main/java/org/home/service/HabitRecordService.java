@@ -1,5 +1,6 @@
 package org.home.service;
 
+import org.home.annotations.LoggableUserAction;
 import org.home.dto.HabitRecordDTO;
 import org.home.mapper.HabitRecordMapper;
 import org.home.model.Habit;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 /**
  * The {@code HabitRecordService} class provides methods for managing habit records.
  */
+@LoggableUserAction
 public class HabitRecordService {
 
     private static final HabitRecordMapper MAPPER = Mappers.getMapper(HabitRecordMapper.class);

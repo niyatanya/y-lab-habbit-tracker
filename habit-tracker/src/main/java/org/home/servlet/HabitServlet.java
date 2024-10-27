@@ -6,6 +6,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.home.annotations.LoggableUserAction;
 import org.home.dto.HabitDTO;
 import org.home.service.AuthService;
 import org.home.service.HabitService;
@@ -15,6 +16,7 @@ import java.util.Map;
 
 import static org.home.model.Role.ADMIN;
 
+@LoggableUserAction
 @WebServlet("/secured/habits/*")
 public class HabitServlet extends HttpServlet {
 

@@ -8,6 +8,12 @@ plugins {
     id("io.freefair.lombok") version "8.6"
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
+
 group = "org.home"
 version = "1.0-SNAPSHOT"
 
@@ -38,6 +44,8 @@ dependencies {
 
     testImplementation("org.mockito:mockito-core:5.12.0")
     testImplementation("org.mockito:mockito-junit-jupiter:5.12.0")
+
+    implementation("org.aspectj:aspectjrt:1.9.20.1")
 }
 
 tasks.withType<Test> {
@@ -62,4 +70,15 @@ tasks.war {
     archiveFileName.set("habit-tracker.war")
     archiveBaseName.set("lessonthree")
     from("src/main/webapp")
+}
+
+tasks.withType<JavaCompile> {
+    options.compilerArgs.addAll(listOf(
+        "-source", "21",
+        "-target", "21",
+        "-Xlint:none",
+        "-verbose"
+    ))
+    options.encoding = "UTF-8"
+    options.isFork = true
 }

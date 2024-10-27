@@ -6,6 +6,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.home.annotations.LoggableUserAction;
 import org.home.dto.HabitRecordDTO;
 import org.home.service.AuthService;
 import org.home.service.HabitRecordService;
@@ -18,6 +19,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import static org.home.model.Role.ADMIN;
 
+@LoggableUserAction
 @WebServlet("/secured/records/*")
 public class HabitRecordServlet extends HttpServlet {
 

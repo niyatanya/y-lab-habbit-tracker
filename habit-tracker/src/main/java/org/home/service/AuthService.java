@@ -2,12 +2,14 @@ package org.home.service;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.home.annotations.LoggableUserAction;
 import org.home.model.Role;
 import org.home.model.User;
 
 import java.util.HashMap;
 import java.util.UUID;
 
+@LoggableUserAction
 @Getter
 public class AuthService {
     private static final HashMap<String, UserSession> SESSIONS = new HashMap<>();

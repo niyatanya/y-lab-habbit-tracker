@@ -6,6 +6,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.home.annotations.LoggableUserAction;
 import org.home.dto.LoginInputDTO;
 import org.home.dto.LoginOutputDTO;
 import org.home.model.User;
@@ -15,6 +16,7 @@ import org.home.service.UserService;
 import java.io.IOException;
 import java.util.Map;
 
+@LoggableUserAction
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
 

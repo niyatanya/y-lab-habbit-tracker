@@ -6,6 +6,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.home.annotations.LoggableUserAction;
 import org.home.dto.UserCreateDTO;
 import org.home.dto.UserDTO;
 import org.home.service.AuthService;
@@ -52,6 +53,7 @@ public class UserServlet extends HttpServlet {
         }
     }
 
+    @LoggableUserAction
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String email = req.getPathInfo().split("/")[1];
@@ -84,6 +86,7 @@ public class UserServlet extends HttpServlet {
         }
     }
 
+    @LoggableUserAction
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String email = req.getPathInfo().split("/")[1];

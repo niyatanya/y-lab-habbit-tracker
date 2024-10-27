@@ -6,6 +6,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.home.annotations.LoggableUserAction;
 import org.home.dto.UserCreateDTO;
 import org.home.dto.UserDTO;
 import org.home.service.UserService;
@@ -13,6 +14,7 @@ import org.home.service.UserService;
 import java.io.IOException;
 import java.util.Map;
 
+@LoggableUserAction
 @WebServlet("/register")
 public class RegisterServlet extends HttpServlet {
 
@@ -46,4 +48,3 @@ public class RegisterServlet extends HttpServlet {
         }
     }
 }
-
