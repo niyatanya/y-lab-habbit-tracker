@@ -60,6 +60,11 @@ public class ConfigLoader {
         return properties.getProperty("change-log").substring(10);
     }
 
+    /**
+     * Retrieves the Liquibase enabled status from the properties file.
+     *
+     * @return the Liquibase enabled status
+     */
     public boolean isLiquibaseEnabled() {
         return Boolean.parseBoolean(properties.getProperty("enabled"));
     }

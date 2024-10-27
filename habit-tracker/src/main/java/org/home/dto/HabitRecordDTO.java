@@ -7,6 +7,9 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
+/**
+ * Data Transfer Object (DTO) for a habit record.
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

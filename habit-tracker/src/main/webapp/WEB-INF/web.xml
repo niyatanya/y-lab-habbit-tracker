@@ -24,15 +24,6 @@
     </context-param>
 
     <servlet>
-        <servlet-name>HelloServlet</servlet-name>
-        <servlet-class>org.home.servlet.HelloServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>HelloServlet</servlet-name>
-        <url-pattern>/hello</url-pattern>
-    </servlet-mapping>
-
-    <servlet>
         <servlet-name>LoginServlet</servlet-name>
         <servlet-class>org.home.servlet.LoginServlet</servlet-class>
     </servlet>

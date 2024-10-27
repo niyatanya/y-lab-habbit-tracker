@@ -5,6 +5,9 @@ import org.home.model.Habit;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 
+/**
+ * Mapper for converting between {@link Habit} entities and {@link HabitDTO} objects.
+ */
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public abstract class HabitMapper {
     public abstract HabitDTO toDTO(Habit habit);

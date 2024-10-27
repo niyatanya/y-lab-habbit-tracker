@@ -108,6 +108,7 @@ public class StatisticsService {
     /**
      * Generates a progress report for a given user and habit title within a specified date range.
      *
+     * @param inputDTO The data transfer object containing input data for statistics calculation
      * @return a {@link String} containing the result of the operation
      */
     public Map<String, Map<String, String>> generateProgressReport(StatisticsInputDTO inputDTO) {

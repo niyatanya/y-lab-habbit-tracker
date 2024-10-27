@@ -6,6 +6,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.home.model.Frequency;
 
+/**
+ * Data Transfer Object (DTO) for a habit.
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

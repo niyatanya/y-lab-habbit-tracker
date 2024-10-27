@@ -7,6 +7,10 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
+/**
+ * Data Transfer Object (DTO) for statistics input.
+ * Holds information required to generate statistics for a specific habit.
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

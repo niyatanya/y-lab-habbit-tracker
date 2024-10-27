@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Data Transfer Object (DTO) for creating a new user or updating an existing user.
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

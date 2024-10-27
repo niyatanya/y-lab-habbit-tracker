@@ -23,10 +23,11 @@ public class UserService {
     private static final UserMapper MAPPER = Mappers.getMapper(UserMapper.class);
 
     /**
-     * Registers a new user with given parameters.
+     * Registers a new user.
      *
-     * @return the newly created {@link User} if registration is successful;
-     * returns null if the email is already registered
+     * @param dto The data transfer object containing user details.
+     * @return The created {@link UserDTO} if registration is successful;
+     * {@code null} if the email is already registered.
      */
     @LoggableUserAction
     public UserDTO register(UserCreateDTO dto) {
@@ -67,8 +68,11 @@ public class UserService {
     }
 
     /**
-     * Edits the profile of a user.
+     * Edits the profile information of a user.
      *
+     * @param oldEmail The current email of the user.
+     * @param dto The data transfer object containing the updated profile information.
+     * @return The updated {@link UserDTO}; {@code null} if the new email is already registered by some user.
      */
     @LoggableUserAction
     public UserDTO editProfile(String oldEmail, UserCreateDTO dto) {
@@ -87,6 +91,8 @@ public class UserService {
     /**
      * Deletes a user account.
      *
+     * @param email The email of the user to be deleted.
+     * @return {@code true} if the user was successfully deleted; {@code false} if the user is an admin.
      */
     @LoggableUserAction
     public boolean deleteUser(String email) {
@@ -100,9 +106,9 @@ public class UserService {
     }
 
     /**
-     * Retrieves all users in the system.
+     * Retrieves all registered users.
      *
-     * @return a map of all {@link User} entities
+     * @return A map of user emails to {@link UserDTO} objects.
      */
     public Map<String, UserDTO> getAllUsers() {
         Map<String, User> userMap = UserRepository.getEntities();
@@ -156,6 +162,13 @@ public class UserService {
         }
     }
 
+    /**
+     * Validates the password of a user.
+     *
+     * @param user The {@link User} whose password is being validated.
+     * @param password The password to validate.
+     * @return {@code true} if the password is correct; {@code false} otherwise.
+     */
     @LoggableUserAction
     public boolean validatePassword(User user, String password) {
         return user.getPassword().equals(password);
