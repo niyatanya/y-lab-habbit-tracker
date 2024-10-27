@@ -35,10 +35,10 @@ public class UserRepository {
      * @return a map of user emails to {@link User} objects
      */
     public static Map<String, User> getEntities() {
-        String sql = "SELECT * FROM ylab_schema.users";
+        ResultSet resultSet = null;
         try (Connection conn = connectionProvider.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            ResultSet resultSet = pstmt.executeQuery();
+             PreparedStatement pstmt = conn.prepareStatement(SqlQueries.SELECT_ALL_USERS)) {
+            resultSet = pstmt.executeQuery();
 
             Map<String, User> result = new HashMap<>();
             while (resultSet.next()) {
@@ -48,7 +48,15 @@ public class UserRepository {
             return result;
         } catch (SQLException e) {
             System.out.println("Got SQL Exception: " + e.getMessage());
+        } finally {
+            try {
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Failed to close result set: " + e.getMessage());
             }
+        }
         return new HashMap<>();
     }
 
@@ -58,20 +66,29 @@ public class UserRepository {
      * @param user the {@link User} to be saved
      */
     public static void save(User user) {
-        String sql = "INSERT INTO ylab_schema.users (name, email, password, role) VALUES (?, ?, ?, ?::ROLE)";
+        ResultSet generatedKeys = null;
         try (Connection conn = connectionProvider.getConnection();
-                PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                PreparedStatement pstmt = conn.prepareStatement(
+                        SqlQueries.INSERT_USER, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, user.getName());
             pstmt.setString(2, user.getEmail());
             pstmt.setString(3, user.getPassword());
             pstmt.setObject(4, user.getRole().name());
             pstmt.executeUpdate();
-            ResultSet generatedKeys = pstmt.getGeneratedKeys();
+            generatedKeys = pstmt.getGeneratedKeys();
             if (generatedKeys.next()) {
                 user.setId(generatedKeys.getLong(1));
             }
         } catch (SQLException e) {
             System.out.println("Got SQL Exception: " + e.getMessage());
+        } finally {
+            try {
+                if (generatedKeys != null) {
+                    generatedKeys.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Failed to close result set: " + e.getMessage());
+            }
         }
     }
 
@@ -82,16 +99,24 @@ public class UserRepository {
      * @return an {@link Optional} containing the {@link User} if found, or an empty {@link Optional}
      */
     public static Optional<User> findByEmail(String email) {
-        String sql = "SELECT * FROM ylab_schema.users WHERE email = ?";
+        ResultSet resultSet = null;
         try (Connection conn = connectionProvider.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(SqlQueries.SELECT_USER)) {
             pstmt.setString(1, email);
-            ResultSet resultSet = pstmt.executeQuery();
+            resultSet = pstmt.executeQuery();
             if (resultSet.next()) {
                 return Optional.of(getUserFromResultSet(resultSet));
             }
         } catch (SQLException e) {
             System.out.println("Got SQL Exception: " + e.getMessage());
+        } finally {
+            try {
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Failed to close result set: " + e.getMessage());
+            }
         }
         return Optional.empty();
     }
@@ -103,16 +128,24 @@ public class UserRepository {
      * @return {@code true} if the email is already registered; {@code false} otherwise
      */
     public static boolean emailIsAlreadyRegistered(String email) {
-        String sql = "SELECT * FROM ylab_schema.users WHERE email = ?";
+        ResultSet resultSet = null;
         try (Connection conn = connectionProvider.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(SqlQueries.SELECT_USER)) {
             pstmt.setString(1, email);
-            ResultSet resultSet = pstmt.executeQuery();
+            resultSet = pstmt.executeQuery();
             if (resultSet.next()) {
                 return true;
             }
         } catch (SQLException e) {
             System.out.println("Got SQL Exception: " + e.getMessage());
+        }  finally {
+            try {
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Failed to close result set: " + e.getMessage());
+            }
         }
         return false;
     }
@@ -124,9 +157,8 @@ public class UserRepository {
      * @return {@code true} if the update was successful; {@code false} otherwise
      */
     public static boolean update(User user) {
-        String sql = "UPDATE ylab_schema.users SET name = ?, email = ?, password = ?, is_blocked = ? WHERE id = ?";
         try (Connection conn = connectionProvider.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(SqlQueries.UPDATE_USER)) {
             pstmt.setString(1, user.getName());
             pstmt.setString(2, user.getEmail());
             pstmt.setString(3, user.getPassword());
@@ -148,9 +180,8 @@ public class UserRepository {
      * @return {@code true} if the deletion was successful; {@code false} otherwise
      */
     public static boolean delete(User user) {
-        String sql = "DELETE FROM ylab_schema.users WHERE email = ?";
         try (Connection conn = connectionProvider.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(SqlQueries.DELETE_USER)) {
             pstmt.setString(1, user.getEmail());
 
             int rowsAffected = pstmt.executeUpdate();

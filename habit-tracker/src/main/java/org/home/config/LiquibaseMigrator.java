@@ -28,6 +28,11 @@ public class LiquibaseMigrator {
      * applies the changes specified in the Liquibase changelog.
      */
     public static void updateMigrations() {
+        if (!configLoader.isLiquibaseEnabled()) {
+            System.out.println("Liquibase is disabled.");
+            return;
+        }
+
         String dbUrl = configLoader.getDbUrl();
         String username = configLoader.getDbUsername();
         String password = configLoader.getDbPassword();

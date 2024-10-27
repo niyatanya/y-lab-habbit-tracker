@@ -38,11 +38,11 @@ public class HabitRecordRepository {
      * @return a map of dates to {@link HabitRecord} objects for the specified habit
      */
     public static Map<LocalDate, HabitRecord> getAllHabitRecords(Habit habit) {
-        String sql = "SELECT * FROM ylab_schema.records WHERE habit_id = ?";
+        ResultSet resultSet = null;
         try (Connection conn = connectionProvider.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(SqlQueries.SELECT_ALL_RECORDS)) {
             pstmt.setLong(1, habit.getId());
-            ResultSet resultSet = pstmt.executeQuery();
+            resultSet = pstmt.executeQuery();
 
             Map<LocalDate, HabitRecord> result = new HashMap<>();
             while (resultSet.next()) {
@@ -52,6 +52,14 @@ public class HabitRecordRepository {
             return result;
         } catch (SQLException e) {
             System.out.println("Got SQL Exception: " + e.getMessage());
+        } finally {
+            try {
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Failed to close result set: " + e.getMessage());
+            }
         }
         return new HashMap<>();
     }
@@ -62,20 +70,29 @@ public class HabitRecordRepository {
      * @param record the {@link HabitRecord} to be saved
      */
     public static void save(HabitRecord record) {
-        String sql = "INSERT INTO ylab_schema.records (date, completed, habit_id) VALUES (?, ?, ?)";
+        ResultSet generatedKeys = null;
         try (Connection conn = connectionProvider.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+             PreparedStatement pstmt = conn.prepareStatement(
+                     SqlQueries.INSERT_RECORD, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setDate(1, Date.valueOf(record.getDate()));
             pstmt.setBoolean(2, record.isCompleted());
             pstmt.setObject(3, record.getHabitId());
             pstmt.executeUpdate();
-            ResultSet generatedKeys = pstmt.getGeneratedKeys();
+            generatedKeys = pstmt.getGeneratedKeys();
 
             if (generatedKeys.next()) {
                 record.setId(generatedKeys.getLong(1));
             }
         } catch (SQLException e) {
             System.out.println("Got SQL Exception: " + e.getMessage());
+        } finally {
+            try {
+                if (generatedKeys != null) {
+                    generatedKeys.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Failed to close result set: " + e.getMessage());
+            }
         }
     }
 
@@ -87,17 +104,25 @@ public class HabitRecordRepository {
      * @return {@code true} if the record exists; {@code false} otherwise
      */
     public static boolean recordExists(Long habitId, LocalDate date) {
-        String sql = "SELECT * FROM ylab_schema.records WHERE habit_id = ? AND date = ?";
+        ResultSet resultSet = null;
         try (Connection conn = connectionProvider.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(SqlQueries.SELECT_RECORD)) {
             pstmt.setLong(1, habitId);
             pstmt.setDate(2, Date.valueOf(date));
-            ResultSet resultSet = pstmt.executeQuery();
+            resultSet = pstmt.executeQuery();
             if (resultSet.next()) {
                 return true;
             }
         } catch (SQLException e) {
             System.out.println("Got SQL Exception: " + e.getMessage());
+        } finally {
+            try {
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Failed to close result set: " + e.getMessage());
+            }
         }
         return false;
     }
@@ -110,17 +135,25 @@ public class HabitRecordRepository {
      * @return an {@link Optional} containing the {@link HabitRecord} if found, or an empty {@link Optional}
      */
     public static Optional<HabitRecord> findByDateAndHabitId(LocalDate date, Long habitId) {
-        String sql = "SELECT * FROM ylab_schema.records WHERE date = ? AND habit_id = ?";
+        ResultSet resultSet = null;
         try (Connection conn = connectionProvider.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setDate(1, Date.valueOf(date));
-            pstmt.setLong(2, habitId);
-            ResultSet resultSet = pstmt.executeQuery();
+             PreparedStatement pstmt = conn.prepareStatement(SqlQueries.SELECT_RECORD)) {
+            pstmt.setLong(1, habitId);
+            pstmt.setDate(2, Date.valueOf(date));
+            resultSet = pstmt.executeQuery();
             if (resultSet.next()) {
                 return Optional.of(getRecordFromResultSet(resultSet));
             }
         } catch (SQLException e) {
             System.out.println("Got SQL Exception: " + e.getMessage());
+        } finally {
+            try {
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Failed to close result set: " + e.getMessage());
+            }
         }
         return Optional.empty();
     }
@@ -132,9 +165,8 @@ public class HabitRecordRepository {
      * @return {@code true} if the update was successful; {@code false} otherwise
      */
     public static boolean update(HabitRecord record) {
-        String sql = "UPDATE ylab_schema.records SET completed = ? WHERE id = ?";
         try (Connection conn = connectionProvider.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(SqlQueries.UPDATE_RECORD)) {
             pstmt.setBoolean(1, record.isCompleted());
             pstmt.setLong(2, record.getId());
 
@@ -153,9 +185,8 @@ public class HabitRecordRepository {
      * @return {@code true} if the deletion was successful; {@code false} otherwise
      */
     public static boolean delete(HabitRecord record) {
-        String sql = "DELETE FROM ylab_schema.records WHERE id = ?";
         try (Connection conn = connectionProvider.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(SqlQueries.DELETE_RECORD)) {
             pstmt.setLong(1, record.getId());
 
             int rowsAffected = pstmt.executeUpdate();

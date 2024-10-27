@@ -59,4 +59,8 @@ public class ConfigLoader {
     public String getLiquibaseChangeLog() {
         return properties.getProperty("change-log").substring(10);
     }
+
+    public boolean isLiquibaseEnabled() {
+        return Boolean.parseBoolean(properties.getProperty("enabled"));
+    }
 }
