@@ -2,7 +2,6 @@ package org.home;
 
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
-import org.home.component.DefaultComponentFactory;
 import org.home.config.DBConnectionProvider;
 import org.home.config.LiquibaseMigrator;
 import org.home.repository.HabitRecordRepository;
@@ -15,15 +14,14 @@ public class StartupListener implements ServletContextListener {
         String dbUrl = sce.getServletContext().getInitParameter("dbUrl");
         String dbUser = sce.getServletContext().getInitParameter("dbUser");
         String dbPassword = sce.getServletContext().getInitParameter("dbPassword");
+        String changeLogFile = sce.getServletContext().getInitParameter("changeLogFile");
 
-        DefaultComponentFactory componentFactory = new DefaultComponentFactory();
         DBConnectionProvider connProvider = new DBConnectionProvider(dbUrl, dbUser, dbPassword);
+        sce.getServletContext().setAttribute(changeLogFile, connProvider);
 
-        sce.getServletContext().setAttribute("connProvider", connProvider);
-
-        UserRepository userRepository = componentFactory.createUserRepository(connProvider);
-        HabitRepository habitRepository = componentFactory.createHabitRepository(connProvider);
-        HabitRecordRepository recordRepository = componentFactory.createHabitRecordRepository(connProvider);
-        LiquibaseMigrator.updateMigrations();
+        UserRepository userRepository = new UserRepository(connProvider);
+        HabitRepository habitRepository = new HabitRepository(connProvider);
+        HabitRecordRepository recordRepository = new HabitRecordRepository(connProvider);
+        LiquibaseMigrator.updateMigrations(dbUrl, dbUser, dbPassword, changeLogFile);
     }
 }

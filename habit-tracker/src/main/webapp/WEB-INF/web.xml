@@ -22,6 +22,10 @@
         <param-name>dbPassword</param-name>
         <param-value>pass123</param-value>
     </context-param>
+    <context-param>
+        <param-name>changeLogFile</param-name>
+        <param-value>db/changelog/changelog.xml</param-value>
+    </context-param>
 
     <servlet>
         <servlet-name>LoginServlet</servlet-name>
