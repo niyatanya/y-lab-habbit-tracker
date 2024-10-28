@@ -2,10 +2,10 @@ package org.home.servlet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.NoArgsConstructor;
 import org.home.annotations.LoggableUserAction;
 import org.home.dto.HabitRecordDTO;
 import org.home.service.AuthService;
@@ -20,12 +20,12 @@ import org.home.validation.HabitRecordDTOValidator;
 
 import static org.home.model.Role.ADMIN;
 
+@NoArgsConstructor
 @LoggableUserAction
-@WebServlet("/secured/records/*")
 public class HabitRecordServlet extends HttpServlet {
 
-    private final HabitRecordService recordService;
-    private final ObjectMapper objectMapper;
+    private HabitRecordService recordService;
+    private ObjectMapper objectMapper;
 
     public HabitRecordServlet(HabitRecordService recordService) {
         this.recordService = recordService;

@@ -2,11 +2,11 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
-    java
-    application
-    war
-    checkstyle
+    id("java")
+    id("war")
+    id("checkstyle")
     id("io.freefair.lombok") version "8.6"
+    id("io.freefair.aspectj.post-compile-weaving") version "8.6"
 }
 
 java {
@@ -20,10 +20,6 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
-}
-
-application {
-    mainClass.set("org.home.Main")
 }
 
 dependencies {
@@ -50,7 +46,8 @@ dependencies {
     testImplementation("org.mockito:mockito-core:5.12.0")
     testImplementation("org.mockito:mockito-junit-jupiter:5.12.0")
 
-    implementation("org.aspectj:aspectjrt:1.9.20.1")
+    implementation("org.aspectj:aspectjrt:1.9.21.1")
+    implementation("org.aspectj:aspectjweaver:1.9.21.1")
 }
 
 tasks.withType<Test> {
@@ -73,16 +70,13 @@ tasks.withType<Test> {
 
 tasks.war {
     archiveFileName.set("habit-tracker.war")
-    archiveBaseName.set("lessonthree")
-    from("src/main/webapp")
 }
 
 tasks.withType<JavaCompile> {
     options.compilerArgs.addAll(listOf(
         "-source", "21",
         "-target", "21",
-        "-Xlint:none",
-        "-verbose"
+        "-Xlint:none"
     ))
     options.encoding = "UTF-8"
     options.isFork = true

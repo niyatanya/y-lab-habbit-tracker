@@ -2,10 +2,10 @@ package org.home.servlet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.NoArgsConstructor;
 import org.home.annotations.LoggableUserAction;
 import org.home.dto.LoginInputDTO;
 import org.home.dto.LoginOutputDTO;
@@ -17,13 +17,13 @@ import org.home.validation.LoginInputDTOValidator;
 import java.io.IOException;
 import java.util.Map;
 
+@NoArgsConstructor
 @LoggableUserAction
-@WebServlet("/login")
 public class LoginServlet extends HttpServlet {
 
-    private final AuthService authService;
-    private final UserService userService;
-    private final ObjectMapper objectMapper;
+    private AuthService authService;
+    private UserService userService;
+    private ObjectMapper objectMapper;
 
     public LoginServlet(UserService userService, AuthService authService) {
         this.userService = userService;

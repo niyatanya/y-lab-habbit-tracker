@@ -2,10 +2,10 @@ package org.home.servlet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.NoArgsConstructor;
 import org.home.annotations.LoggableUserAction;
 import org.home.dto.HabitDTO;
 import org.home.service.AuthService;
@@ -17,12 +17,12 @@ import java.util.Map;
 
 import static org.home.model.Role.ADMIN;
 
+@NoArgsConstructor
 @LoggableUserAction
-@WebServlet("/secured/habits/*")
 public class HabitServlet extends HttpServlet {
 
-    private final HabitService habitService;
-    private final ObjectMapper objectMapper;
+    private HabitService habitService;
+    private ObjectMapper objectMapper;
 
     public HabitServlet(HabitService habitService) {
         this.habitService = habitService;

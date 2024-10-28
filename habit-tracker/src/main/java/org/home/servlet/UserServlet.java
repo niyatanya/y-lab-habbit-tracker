@@ -2,10 +2,10 @@ package org.home.servlet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.NoArgsConstructor;
 import org.home.annotations.LoggableUserAction;
 import org.home.dto.UserCreateDTO;
 import org.home.dto.UserDTO;
@@ -19,11 +19,11 @@ import java.util.Map;
 
 import static org.home.model.Role.ADMIN;
 
-@WebServlet("/secured/users/*")
+@NoArgsConstructor
 public class UserServlet extends HttpServlet {
 
-    private final UserService userService;
-    private final ObjectMapper objectMapper;
+    private UserService userService;
+    private ObjectMapper objectMapper;
 
     public UserServlet(UserService userService) {
         this.userService = userService;

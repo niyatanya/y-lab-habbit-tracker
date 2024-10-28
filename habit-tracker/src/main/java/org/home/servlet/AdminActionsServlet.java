@@ -2,10 +2,10 @@ package org.home.servlet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.NoArgsConstructor;
 import org.home.model.User;
 import org.home.service.UserService;
 import org.home.service.AuthService;
@@ -15,11 +15,11 @@ import java.util.Map;
 
 import static org.home.model.Role.ADMIN;
 
-@WebServlet("/secured/admin/users/*")
+@NoArgsConstructor
 public class AdminActionsServlet extends HttpServlet {
 
-    private final UserService userService;
-    private final ObjectMapper objectMapper;
+    private UserService userService;
+    private ObjectMapper objectMapper;
 
     public AdminActionsServlet(UserService userService) {
         this.userService = userService;

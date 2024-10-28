@@ -1,6 +1,6 @@
 package org.home.aspect;
 
-import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
@@ -24,7 +24,7 @@ public class LoggableUserActionAspect {
      * annotated with {@link org.home.annotations.LoggableUserAction}.
      */
     @After("annotatedByLoggableUserAction()")
-    public void logging(ProceedingJoinPoint joinPoint) {
+    public void logging(JoinPoint joinPoint) {
         System.out.println("User calls method: " + joinPoint.getSignature());
     }
 }

@@ -3,10 +3,10 @@ package org.home.servlet;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.NoArgsConstructor;
 import org.home.annotations.LoggableUserAction;
 import org.home.dto.StatisticsInputDTO;
 import org.home.service.AuthService;
@@ -19,12 +19,12 @@ import java.util.Map;
 
 import static org.home.model.Role.ADMIN;
 
+@NoArgsConstructor
 @LoggableUserAction
-@WebServlet("/secured/statistics")
 public class StatisticsServlet extends HttpServlet {
 
-    private final StatisticsService statisticsService;
-    private final ObjectMapper objectMapper;
+    private StatisticsService statisticsService;
+    private ObjectMapper objectMapper;
 
     public StatisticsServlet(StatisticsService statisticsService) {
         this.statisticsService = statisticsService;
