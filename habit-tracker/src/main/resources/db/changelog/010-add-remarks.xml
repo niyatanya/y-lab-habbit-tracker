@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd"
+        logicalFilePath="db/changelog.xml">
+
+    <changeSet id="010-add-remarks" author="tanya">
+
+        <sql dbms="postgresql">
+            COMMENT ON TABLE ylab_schema.users IS 'Таблица пользователей';
+            COMMENT ON COLUMN ylab_schema.users.id IS 'Идентификатор пользователя';
+            COMMENT ON COLUMN ylab_schema.users.email IS 'Email адрес пользователя';
+            COMMENT ON COLUMN ylab_schema.users.name IS 'Имя пользователя';
+            COMMENT ON COLUMN ylab_schema.users.password IS 'Пароль пользователя';
+            COMMENT ON COLUMN ylab_schema.users.role IS 'Роль пользователя (USER или ADMIN)';
+            COMMENT ON COLUMN ylab_schema.users.is_blocked IS 'Статус блокировки пользователя';
+        </sql>
+
+        <sql dbms="postgresql">
+            COMMENT ON TABLE ylab_schema.habits IS 'Таблица привычек';
+            COMMENT ON COLUMN ylab_schema.habits.id IS 'Идентификатор привычки';
+            COMMENT ON COLUMN ylab_schema.habits.title IS 'Название привычки';
+            COMMENT ON COLUMN ylab_schema.habits.description IS 'Описание привычки';
+            COMMENT ON COLUMN ylab_schema.habits.frequency IS 'Частота выполнения привычки';
+        </sql>
+
+        <sql dbms="postgresql">
+            COMMENT ON TABLE ylab_schema.records IS 'Таблица записей о привычках';
+            COMMENT ON COLUMN ylab_schema.records.id IS 'Идентификатор записи';
+            COMMENT ON COLUMN ylab_schema.records.date IS 'Дата выполнения привычки';
+            COMMENT ON COLUMN ylab_schema.records.completed IS 'Статус выполнения привычки';
+        </sql>
+
+    </changeSet>
+</databaseChangeLog>

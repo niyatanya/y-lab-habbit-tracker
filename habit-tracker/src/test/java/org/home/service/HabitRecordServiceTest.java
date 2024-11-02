@@ -1,6 +1,7 @@
 package org.home.service;
 
 import org.home.config.DBConnectionProvider;
+import org.home.dto.HabitRecordDTO;
 import org.home.model.Habit;
 import org.home.model.HabitRecord;
 import org.home.model.User;
@@ -64,13 +65,14 @@ public class HabitRecordServiceTest {
     void testCreateRecord() {
         LocalDate date = LocalDate.of(2024, 10, 1);
         boolean completed = true;
+        HabitRecordDTO recordDTO = new HabitRecordDTO(date, completed);
 
-        HabitRecord createdRecord = recordService.createRecord(habit, date, completed);
+        HabitRecordDTO createdRecordDTO = recordService.createRecord(user.getEmail(), habit.getTitle(), recordDTO);
 
-        assertThat(createdRecord).isNotNull();
-        assertThat(createdRecord.getDate()).isEqualTo(date);
-        assertThat(createdRecord.isCompleted()).isEqualTo(completed);
-        assertThat(recordService.getAllRecords(habit)).containsKey(date);
+        assertThat(createdRecordDTO).isNotNull();
+        assertThat(createdRecordDTO.getDate()).isEqualTo(date);
+        assertThat(createdRecordDTO.isCompleted()).isEqualTo(completed);
+        assertThat(recordService.getAllRecords(user.getEmail(), habit.getTitle())).containsKey(date);
     }
 
     @Test
@@ -78,12 +80,13 @@ public class HabitRecordServiceTest {
     void testEditRecord() {
         LocalDate date = LocalDate.of(2024, 10, 2);
         boolean oldCompleted = true;
+        HabitRecordDTO oldRecordDTO = new HabitRecordDTO(date, oldCompleted);
+        HabitRecordDTO recordDTO = recordService.createRecord(user.getEmail(), habit.getTitle(), oldRecordDTO);
+        assertThat(recordDTO.getDate()).isEqualTo(date);
+
         boolean newCompleted = false;
-
-        HabitRecord record = recordService.createRecord(habit, date, oldCompleted);
-        assertThat(record.getDate()).isEqualTo(date);
-
-        recordService.editRecord(habit, oldCompleted, newCompleted, date);
+        HabitRecordDTO newRecordDTO = new HabitRecordDTO(date, newCompleted);
+        recordService.editRecord(user.getEmail(), habit.getTitle(), newRecordDTO);
 
         HabitRecord editedRecord = recordService.findByDateAndHabitId(habit, date);
 
@@ -95,10 +98,13 @@ public class HabitRecordServiceTest {
     @DisplayName("Delete record")
     void testDeleteRecord() {
         LocalDate date = LocalDate.of(2024, 10, 3);
-        HabitRecord record = recordService.createRecord(habit, date, false);
-        assertThat(recordService.getAllRecords(habit)).containsKey(date);
+        boolean completed = true;
+        HabitRecordDTO recordDTO = new HabitRecordDTO(date, completed);
 
-        recordService.deleteRecord(habit, date);
-        assertThat(recordService.getAllRecords(habit)).doesNotContainKey(date);
+        HabitRecordDTO recordDTOToDelete = recordService.createRecord(user.getEmail(), habit.getTitle(), recordDTO);
+        assertThat(recordService.getAllRecords(user.getEmail(), habit.getTitle())).containsKey(date);
+
+        recordService.deleteRecord(user.getEmail(), habit.getTitle(), recordDTOToDelete);
+        assertThat(recordService.getAllRecords(user.getEmail(), habit.getTitle())).doesNotContainKey(date);
     }
 }

@@ -1,8 +1,8 @@
 package org.home.service;
 
 import org.home.config.DBConnectionProvider;
+import org.home.dto.HabitDTO;
 import org.home.model.Frequency;
-import org.home.model.Habit;
 import org.home.model.User;
 import org.home.repository.HabitRepository;
 import org.home.repository.UserRepository;
@@ -56,43 +56,46 @@ class HabitServiceTest {
         String title = "Do push ups";
         String description = "Do 10 push ups every day";
         Frequency frequency = Frequency.DAILY;
+        HabitDTO habitDTO = new HabitDTO(title, description, frequency);
 
-        Habit createdHabit = habitService.createHabit(user, title, description, frequency);
+        HabitDTO createdHabit = habitService.createHabit(user.getEmail(), habitDTO);
 
         assertThat(createdHabit.getTitle()).isEqualTo(title);
         assertThat(createdHabit.getDescription()).isEqualTo(description);
         assertThat(createdHabit.getFrequency()).isEqualTo(frequency);
-        assertThat(habitService.getAllHabits(user)).containsKey(title);
+        assertThat(habitService.getAllHabits(user.getEmail())).containsKey(title);
     }
 
     @Test
     @DisplayName("Edit habit")
     void testEditHabit() {
         String oldTitle = "Read a book";
+        HabitDTO oldHabitDTO = new HabitDTO(oldTitle, "Description", Frequency.DAILY);
+        HabitDTO habit = habitService.createHabit(user.getEmail(), oldHabitDTO);
+        assertThat(habit.getTitle()).isEqualTo(oldTitle);
+
         String newTitle = "Read a novel";
         String newDescription = "Read for 1 hour";
         Frequency newFrequency = Frequency.WEEKLY;
+        HabitDTO habitDTOToUpdate = new HabitDTO(newTitle, newDescription, newFrequency);
 
-        Habit habit = habitService.createHabit(user, oldTitle, "Description", Frequency.DAILY);
-        assertThat(habit.getTitle()).isEqualTo(oldTitle);
+        HabitDTO updatedHabitDTO = habitService.editHabit(user.getEmail(), oldTitle, habitDTOToUpdate);
 
-        habitService.editHabit(user, oldTitle, newTitle, newDescription, newFrequency);
-
-        Habit editedHabit = habitService.findByTitleAndUserId(user, newTitle);
-
-        assertThat(editedHabit).isNotNull();
-        assertThat(editedHabit.getDescription()).isEqualTo(newDescription);
-        assertThat(editedHabit.getFrequency()).isEqualTo(newFrequency);
+        assertThat(updatedHabitDTO).isNotNull();
+        assertThat(updatedHabitDTO.getTitle()).isEqualTo(newTitle);
+        assertThat(updatedHabitDTO.getDescription()).isEqualTo(newDescription);
+        assertThat(updatedHabitDTO.getFrequency()).isEqualTo(newFrequency);
     }
 
     @Test
     @DisplayName("Delete habit")
     void testDeleteHabit() {
         String title = "Drink water";
-        Habit habit = habitService.createHabit(user, title, "Description", Frequency.DAILY);
-        assertThat(habitService.getAllHabits(user)).containsKey(title);
+        HabitDTO habitDTO = habitService.createHabit(user.getEmail(),
+                new HabitDTO(title, "Description", Frequency.DAILY));
+        assertThat(habitService.getAllHabits(user.getEmail())).containsKey(title);
 
-        habitService.deleteHabit(user, title);
-        assertThat(habitService.getAllHabits(user)).doesNotContainKey(title);
+        habitService.deleteHabit(user.getEmail(), title);
+        assertThat(habitService.getAllHabits(user.getEmail())).doesNotContainKey(title);
     }
 }

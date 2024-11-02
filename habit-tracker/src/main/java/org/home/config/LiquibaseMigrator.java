@@ -20,21 +20,14 @@ import java.sql.SQLException;
 @AllArgsConstructor
 public class LiquibaseMigrator {
 
-    private static ConfigLoader configLoader = new ConfigLoader();
-
     /**
      * Applies database schema changes using Liquibase. It connects to the database
-     * using the credentials and URL provided by the {@link ConfigLoader}, and then
+     * using the credentials and URL provided by the context listener, and then
      * applies the changes specified in the Liquibase changelog.
      */
-    public static void updateMigrations() {
-        String dbUrl = configLoader.getDbUrl();
-        String username = configLoader.getDbUsername();
-        String password = configLoader.getDbPassword();
-        String changeLogFile = configLoader.getLiquibaseChangeLog();
-
+    public static void updateMigrations(String dbUrl, String dbUser, String dbPassword, String changeLogFile) {
         try {
-            Connection connection = DriverManager.getConnection(dbUrl, username, password);
+            Connection connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
             Database database =
                     DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
             Liquibase liquibase =

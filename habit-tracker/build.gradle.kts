@@ -2,9 +2,17 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
-    application
-    checkstyle
+    id("java")
+    id("war")
+    id("checkstyle")
     id("io.freefair.lombok") version "8.6"
+    id("io.freefair.aspectj.post-compile-weaving") version "8.6"
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
 }
 
 group = "org.home"
@@ -12,10 +20,6 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
-}
-
-application {
-    mainClass.set("org.home.Main")
 }
 
 dependencies {
@@ -27,6 +31,23 @@ dependencies {
     testImplementation("org.testcontainers:postgresql:1.19.0")
     implementation("org.postgresql:postgresql:42.7.2")
     implementation("org.liquibase:liquibase-core:4.24.0")
+
+    compileOnly("jakarta.servlet:jakarta.servlet-api:6.0.0")
+    implementation("org.apache.tomcat:tomcat-servlet-api:11.0.0")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.2")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.2")
+
+    implementation("org.mapstruct:mapstruct:1.5.5.Final")
+    annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
+    compileOnly("org.projectlombok:lombok:1.18.34")
+    annotationProcessor("org.projectlombok:lombok:1.18.34")
+    annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
+
+    testImplementation("org.mockito:mockito-core:5.12.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.12.0")
+
+    implementation("org.aspectj:aspectjrt:1.9.21.1")
+    implementation("org.aspectj:aspectjweaver:1.9.21.1")
 }
 
 tasks.withType<Test> {
@@ -45,4 +66,18 @@ tasks.withType<Test> {
         showCauses = true
         showStackTraces = true
     }
+}
+
+tasks.war {
+    archiveFileName.set("habit-tracker.war")
+}
+
+tasks.withType<JavaCompile> {
+    options.compilerArgs.addAll(listOf(
+        "-source", "21",
+        "-target", "21",
+        "-Xlint:none"
+    ))
+    options.encoding = "UTF-8"
+    options.isFork = true
 }
