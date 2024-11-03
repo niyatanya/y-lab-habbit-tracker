@@ -1,6 +1,6 @@
 package org.home.service;
 
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.home.annotations.LoggableUserAction;
 import org.home.dto.StatisticsInputDTO;
 import org.home.model.Habit;
@@ -10,6 +10,7 @@ import org.home.model.Frequency;
 import org.home.repository.HabitRecordRepository;
 import org.home.repository.HabitRepository;
 import org.home.repository.UserRepository;
+import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -23,9 +24,14 @@ import java.util.stream.Collectors;
  * The {@code StatisticsService} class provides methods to calculate statistics related to user habits.
  */
 @LoggableUserAction
-@NoArgsConstructor
+
+@RequiredArgsConstructor
+@Service
 public class StatisticsService {
-    private final HabitService habitService = new HabitService();
+
+    private final UserRepository userRepository;
+    private final HabitRepository habitRepository;
+    private final HabitRecordRepository recordRepository;
 
     /**
      * Calculates the current streak of habit completions for a given user and habit title.
@@ -35,14 +41,14 @@ public class StatisticsService {
      * @return the current streak count; returns 0 if the habit is not found or if there are no completions
      */
     public int getCurrentStreak(User user, String habitTitle) {
-        Optional<Habit> maybeHabit = HabitRepository.findByTitleAndUserId(habitTitle, user.getId());
+        Optional<Habit> maybeHabit = habitRepository.findByTitleAndUserId(habitTitle, user.getId());
         if (maybeHabit.isEmpty()) {
             System.out.println("Habit not found.");
             return 0;
         }
 
         Habit habit = maybeHabit.get();
-        Map<LocalDate, HabitRecord> completions = HabitRecordRepository.getAllHabitRecords(habit);
+        Map<LocalDate, HabitRecord> completions = recordRepository.getAllHabitRecords(habit);
         if (completions.isEmpty()) {
             return 0;
         }
@@ -80,7 +86,7 @@ public class StatisticsService {
      * or if the total days is less than or equal to zero
      */
     public double getSuccessPercentage(User user, String habitTitle, LocalDate startDate, LocalDate endDate) {
-        Optional<Habit> maybeHabit = HabitRepository.findByTitleAndUserId(habitTitle, user.getId());
+        Optional<Habit> maybeHabit = habitRepository.findByTitleAndUserId(habitTitle, user.getId());
         if (maybeHabit.isEmpty()) {
             System.out.println("Habit not found.");
             return 0.0;
@@ -112,9 +118,9 @@ public class StatisticsService {
      * @return a {@link String} containing the result of the operation
      */
     public Map<String, Map<String, String>> generateProgressReport(StatisticsInputDTO inputDTO) {
-        User user = UserRepository.findByEmail(inputDTO.getEmail()).orElseThrow();
+        User user = userRepository.findByEmail(inputDTO.getEmail()).orElseThrow();
         String habitTitle = inputDTO.getHabitTitle();
-        Optional<Habit> maybeHabit = HabitRepository.findByTitleAndUserId(habitTitle, user.getId());
+        Optional<Habit> maybeHabit = habitRepository.findByTitleAndUserId(habitTitle, user.getId());
         if (maybeHabit.isEmpty()) {
             return Map.of(
                     String.format("Progress Report for Habit: %s", habitTitle),
@@ -153,7 +159,7 @@ public class StatisticsService {
     }
 
     private List<HabitRecord> filterCompletionsByDate(Habit habit, LocalDate startDate, LocalDate endDate) {
-        return HabitRecordRepository.getAllHabitRecords(habit).entrySet().stream()
+        return recordRepository.getAllHabitRecords(habit).entrySet().stream()
                 .filter(entry -> !entry.getKey().isBefore(startDate)
                         && !entry.getKey().isAfter(endDate)
                         && entry.getValue().isCompleted())
@@ -162,7 +168,7 @@ public class StatisticsService {
     }
 
     private List<HabitRecord> filterCompletionsByWeek(Habit habit, LocalDate startDate, LocalDate endDate) {
-        return HabitRecordRepository.getAllHabitRecords(habit).entrySet().stream()
+        return recordRepository.getAllHabitRecords(habit).entrySet().stream()
                 .filter(entry -> {
                     LocalDate date = entry.getKey();
                     LocalDate startOfWeek = startDate.with(DayOfWeek.MONDAY);

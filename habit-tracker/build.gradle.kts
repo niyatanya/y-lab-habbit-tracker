@@ -48,6 +48,18 @@ dependencies {
 
     implementation("org.aspectj:aspectjrt:1.9.21.1")
     implementation("org.aspectj:aspectjweaver:1.9.21.1")
+
+    implementation("org.springframework:spring-context:6.1.0")
+    implementation("org.springframework:spring-web:6.1.0")
+    implementation("org.springframework:spring-webmvc:6.1.0")
+    implementation("org.springframework:spring-jdbc:6.1.0")
+
+    implementation("org.springframework.security:spring-security-core:6.1.0")
+    implementation("org.springframework.security:spring-security-web:6.1.0")
+    implementation("org.springframework.security:spring-security-config:6.1.0")
+    testImplementation("org.springframework.security:spring-security-test:6.1.0")
+    implementation("jakarta.validation:jakarta.validation-api:3.1.0")
+    implementation("com.jayway.jsonpath:json-path:2.9.0")
 }
 
 tasks.withType<Test> {

@@ -1,9 +1,11 @@
 package org.home.repository;
 
-import org.home.config.DBConnectionProvider;
+import lombok.RequiredArgsConstructor;
 import org.home.model.Habit;
 import org.home.model.HabitRecord;
+import org.springframework.stereotype.Repository;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -18,18 +20,11 @@ import java.util.Optional;
 /**
  * The {@code HabitRecordRepository} class provides methods to manage habit records in the database.
  */
+@Repository
+@RequiredArgsConstructor
 public class HabitRecordRepository {
 
-    private static DBConnectionProvider connectionProvider;
-
-    /**
-     * Constructs a new {@code HabitRecordRepository} with the provided database connection provider.
-     *
-     * @param connectionProvider the {@link DBConnectionProvider} used to establish database connections
-     */
-    public HabitRecordRepository(DBConnectionProvider connectionProvider) {
-        HabitRecordRepository.connectionProvider = connectionProvider;
-    }
+    private final DataSource dataSource;
 
     /**
      * Retrieves all habit records associated with a specific habit.
@@ -37,9 +32,9 @@ public class HabitRecordRepository {
      * @param habit the {@link Habit} for which to retrieve records
      * @return a map of dates to {@link HabitRecord} objects for the specified habit
      */
-    public static Map<LocalDate, HabitRecord> getAllHabitRecords(Habit habit) {
+    public Map<LocalDate, HabitRecord> getAllHabitRecords(Habit habit) {
         ResultSet resultSet = null;
-        try (Connection conn = connectionProvider.getConnection();
+        try (Connection conn = dataSource.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SqlQueries.SELECT_ALL_RECORDS)) {
             pstmt.setLong(1, habit.getId());
             resultSet = pstmt.executeQuery();
@@ -53,13 +48,7 @@ public class HabitRecordRepository {
         } catch (SQLException e) {
             System.out.println("Got SQL Exception: " + e.getMessage());
         } finally {
-            try {
-                if (resultSet != null) {
-                    resultSet.close();
-                }
-            } catch (SQLException e) {
-                System.out.println("Failed to close result set: " + e.getMessage());
-            }
+            closeResultSet(resultSet);
         }
         return new HashMap<>();
     }
@@ -69,9 +58,9 @@ public class HabitRecordRepository {
      *
      * @param record the {@link HabitRecord} to be saved
      */
-    public static void save(HabitRecord record) {
+    public void save(HabitRecord record) {
         ResultSet generatedKeys = null;
-        try (Connection conn = connectionProvider.getConnection();
+        try (Connection conn = dataSource.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(
                      SqlQueries.INSERT_RECORD, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setDate(1, Date.valueOf(record.getDate()));
@@ -86,13 +75,7 @@ public class HabitRecordRepository {
         } catch (SQLException e) {
             System.out.println("Got SQL Exception: " + e.getMessage());
         } finally {
-            try {
-                if (generatedKeys != null) {
-                    generatedKeys.close();
-                }
-            } catch (SQLException e) {
-                System.out.println("Failed to close result set: " + e.getMessage());
-            }
+            closeResultSet(generatedKeys);
         }
     }
 
@@ -103,9 +86,9 @@ public class HabitRecordRepository {
      * @param date    the date to check for the habit record
      * @return {@code true} if the record exists; {@code false} otherwise
      */
-    public static boolean recordExists(Long habitId, LocalDate date) {
+    public boolean recordExists(Long habitId, LocalDate date) {
         ResultSet resultSet = null;
-        try (Connection conn = connectionProvider.getConnection();
+        try (Connection conn = dataSource.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SqlQueries.SELECT_RECORD)) {
             pstmt.setLong(1, habitId);
             pstmt.setDate(2, Date.valueOf(date));
@@ -116,13 +99,7 @@ public class HabitRecordRepository {
         } catch (SQLException e) {
             System.out.println("Got SQL Exception: " + e.getMessage());
         } finally {
-            try {
-                if (resultSet != null) {
-                    resultSet.close();
-                }
-            } catch (SQLException e) {
-                System.out.println("Failed to close result set: " + e.getMessage());
-            }
+            closeResultSet(resultSet);
         }
         return false;
     }
@@ -134,9 +111,9 @@ public class HabitRecordRepository {
      * @param habitId the ID of the associated habit
      * @return an {@link Optional} containing the {@link HabitRecord} if found, or an empty {@link Optional}
      */
-    public static Optional<HabitRecord> findByDateAndHabitId(LocalDate date, Long habitId) {
+    public Optional<HabitRecord> findByDateAndHabitId(LocalDate date, Long habitId) {
         ResultSet resultSet = null;
-        try (Connection conn = connectionProvider.getConnection();
+        try (Connection conn = dataSource.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SqlQueries.SELECT_RECORD)) {
             pstmt.setLong(1, habitId);
             pstmt.setDate(2, Date.valueOf(date));
@@ -147,13 +124,7 @@ public class HabitRecordRepository {
         } catch (SQLException e) {
             System.out.println("Got SQL Exception: " + e.getMessage());
         } finally {
-            try {
-                if (resultSet != null) {
-                    resultSet.close();
-                }
-            } catch (SQLException e) {
-                System.out.println("Failed to close result set: " + e.getMessage());
-            }
+            closeResultSet(resultSet);
         }
         return Optional.empty();
     }
@@ -164,8 +135,8 @@ public class HabitRecordRepository {
      * @param record the {@link HabitRecord} to update
      * @return {@code true} if the update was successful; {@code false} otherwise
      */
-    public static boolean update(HabitRecord record) {
-        try (Connection conn = connectionProvider.getConnection();
+    public boolean update(HabitRecord record) {
+        try (Connection conn = dataSource.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SqlQueries.UPDATE_RECORD)) {
             pstmt.setBoolean(1, record.isCompleted());
             pstmt.setLong(2, record.getId());
@@ -184,8 +155,8 @@ public class HabitRecordRepository {
      * @param record the {@link HabitRecord} to delete
      * @return {@code true} if the deletion was successful; {@code false} otherwise
      */
-    public static boolean delete(HabitRecord record) {
-        try (Connection conn = connectionProvider.getConnection();
+    public boolean delete(HabitRecord record) {
+        try (Connection conn = dataSource.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SqlQueries.DELETE_RECORD)) {
             pstmt.setLong(1, record.getId());
 
@@ -197,11 +168,21 @@ public class HabitRecordRepository {
         }
     }
 
-    private static HabitRecord getRecordFromResultSet(ResultSet resultSet) throws SQLException {
+    private HabitRecord getRecordFromResultSet(ResultSet resultSet) throws SQLException {
         Long id = resultSet.getLong("id");
         LocalDate date = resultSet.getDate("date").toLocalDate();
         boolean completed = resultSet.getBoolean("completed");
         Long habitId = resultSet.getLong("habit_id");
         return new HabitRecord(id, date, completed, habitId);
+    }
+
+    private void closeResultSet(ResultSet resultSet) {
+        if (resultSet != null) {
+            try {
+                resultSet.close();
+            } catch (SQLException e) {
+                System.out.println("Failed to close result set: " + e.getMessage());
+            }
+        }
     }
 }

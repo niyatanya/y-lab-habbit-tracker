@@ -1,12 +1,16 @@
 package org.home.service;
 
+import lombok.RequiredArgsConstructor;
 import org.home.annotations.LoggableUserAction;
 import org.home.dto.UserCreateDTO;
 import org.home.dto.UserDTO;
 import org.home.mapper.UserMapper;
 import org.home.model.User;
 import org.home.repository.UserRepository;
-import org.mapstruct.factory.Mappers;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 
 import java.util.Map;
 import java.util.Optional;
@@ -18,9 +22,12 @@ import static org.home.model.Role.USER;
 /**
  * The {@code UserService} class provides methods for user management operations.
  */
-public class UserService {
+@Service
+@RequiredArgsConstructor
+public class UserService implements UserDetailsService {
 
-    private static final UserMapper MAPPER = Mappers.getMapper(UserMapper.class);
+    private final UserMapper userMapper;
+    private final UserRepository userRepository;
 
     /**
      * Registers a new user.
@@ -31,14 +38,14 @@ public class UserService {
      */
     @LoggableUserAction
     public UserDTO register(UserCreateDTO dto) {
-        if (UserRepository.emailIsAlreadyRegistered(dto.getEmail())) {
+        if (userRepository.emailIsAlreadyRegistered(dto.getEmail())) {
             return null;
         }
 
-        User newUser = MAPPER.toEntity(dto);
+        User newUser = userMapper.toEntity(dto);
         newUser.setRole(USER);
-        UserRepository.save(newUser);
-        return MAPPER.toDTO(newUser);
+        userRepository.save(newUser);
+        return userMapper.toDTO(newUser);
     }
 
     /**
@@ -51,7 +58,7 @@ public class UserService {
      */
     @LoggableUserAction
     public User login(String email, String password) {
-        Optional<User> maybeUser = UserRepository.findByEmail(email);
+        Optional<User> maybeUser = userRepository.findByEmail(email);
 
         if (maybeUser.isEmpty()) {
             return null;
@@ -76,16 +83,16 @@ public class UserService {
      */
     @LoggableUserAction
     public UserDTO editProfile(String oldEmail, UserCreateDTO dto) {
-        if (!oldEmail.equals(dto.getEmail()) && UserRepository.emailIsAlreadyRegistered(dto.getEmail())) {
+        if (!oldEmail.equals(dto.getEmail()) && userRepository.emailIsAlreadyRegistered(dto.getEmail())) {
             return null;
         }
 
-        User user = UserRepository.findByEmail(oldEmail).orElseThrow();
+        User user = userRepository.findByEmail(oldEmail).orElseThrow();
         user.setName(dto.getName());
         user.setEmail(dto.getEmail());
         user.setPassword(dto.getPassword());
-        UserRepository.update(user);
-        return MAPPER.toDTO(user);
+        userRepository.update(user);
+        return userMapper.toDTO(user);
     }
 
     /**
@@ -96,11 +103,11 @@ public class UserService {
      */
     @LoggableUserAction
     public boolean deleteUser(String email) {
-        User user = UserRepository.findByEmail(email).orElseThrow();
+        User user = userRepository.findByEmail(email).orElseThrow();
         if (user.getRole().equals(ADMIN)) {
             return false;
         } else {
-            UserRepository.delete(user);
+            userRepository.delete(user);
             return true;
         }
     }
@@ -111,11 +118,11 @@ public class UserService {
      * @return A map of user emails to {@link UserDTO} objects.
      */
     public Map<String, UserDTO> getAllUsers() {
-        Map<String, User> userMap = UserRepository.getEntities();
+        Map<String, User> userMap = userRepository.getEntities();
         return userMap.entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
-                        entry -> MAPPER.toDTO(entry.getValue())
+                        entry -> userMapper.toDTO(entry.getValue())
                 ));
     }
 
@@ -127,7 +134,7 @@ public class UserService {
      */
     @LoggableUserAction
     public User findUserByEmail(String email) {
-        return UserRepository.findByEmail(email).orElseThrow();
+        return userRepository.findByEmail(email).orElseThrow();
     }
 
     /**
@@ -141,7 +148,7 @@ public class UserService {
             return false;
         } else {
             user.setBlocked(true);
-            UserRepository.update(user);
+            userRepository.update(user);
             return true;
         }
     }
@@ -157,7 +164,7 @@ public class UserService {
             return false;
         } else {
             user.setBlocked(false);
-            UserRepository.update(user);
+            userRepository.update(user);
             return true;
         }
     }
@@ -172,5 +179,10 @@ public class UserService {
     @LoggableUserAction
     public boolean validatePassword(User user, String password) {
         return user.getPassword().equals(password);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return findUserByEmail(username);
     }
 }

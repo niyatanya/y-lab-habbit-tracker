@@ -1,7 +1,9 @@
 package org.home.service;
 
-import org.home.config.DBConnectionProvider;
 import org.home.dto.HabitRecordDTO;
+import org.home.mapper.HabitMapper;
+import org.home.mapper.HabitRecordMapper;
+import org.home.mapper.UserMapper;
 import org.home.model.Habit;
 import org.home.model.HabitRecord;
 import org.home.model.User;
@@ -13,8 +15,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.testcontainers.containers.PostgreSQLContainer;
 
+import javax.sql.DataSource;
 import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,8 +30,10 @@ public class HabitRecordServiceTest {
     private static PostgreSQLContainer<?> testDb = new PostgreSQLContainer<>("postgres")
             .withInitScript("test-schema.sql");
 
-    private UserService userService;
-    private HabitService habitService;
+    private static final UserMapper USER_MAPPER = Mappers.getMapper(UserMapper.class);
+    private static final HabitMapper HABIT_MAPPER = Mappers.getMapper(HabitMapper.class);
+    private static final HabitRecordMapper RECORD_MAPPER = Mappers.getMapper(HabitRecordMapper.class);
+
     private HabitRecordService recordService;
     private User user;
     private Habit habit;
@@ -43,21 +50,21 @@ public class HabitRecordServiceTest {
 
     @BeforeEach
     void setUp() {
-        DBConnectionProvider connectionProvider = new DBConnectionProvider(
+        DataSource dataSource = new DriverManagerDataSource(
                 testDb.getJdbcUrl(),
                 testDb.getUsername(),
                 testDb.getPassword()
         );
-        userService = new UserService();
-        UserRepository userRepository = new UserRepository(connectionProvider);
+        UserRepository userRepository = new UserRepository(dataSource);
+        HabitRepository habitRepository = new HabitRepository(dataSource);
+        HabitRecordRepository recordRepository = new HabitRecordRepository(dataSource);
+
+        UserService userService = new UserService(USER_MAPPER, userRepository);
+        HabitService habitService = new HabitService(HABIT_MAPPER, userRepository, habitRepository);
+        recordService = new HabitRecordService(RECORD_MAPPER, userRepository, habitRepository, recordRepository);
+
         user = userService.findUserByEmail("tu@example.com");
-
-        habitService = new HabitService();
-        HabitRepository habitRepository = new HabitRepository(connectionProvider);
         habit = habitService.findByTitleAndUserId(user, "Go to shower");
-
-        recordService = new HabitRecordService();
-        HabitRecordRepository recordRepository = new HabitRecordRepository(connectionProvider);
     }
 
     @Test

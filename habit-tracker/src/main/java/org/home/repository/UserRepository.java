@@ -1,9 +1,11 @@
 package org.home.repository;
 
-import org.home.config.DBConnectionProvider;
+import lombok.RequiredArgsConstructor;
 import org.home.model.Role;
 import org.home.model.User;
+import org.springframework.stereotype.Repository;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -16,27 +18,20 @@ import java.util.Optional;
 /**
  * The {@code UserRepository} class provides methods for managing user data in the database.
  */
+@Repository
+@RequiredArgsConstructor
 public class UserRepository {
 
-    private static DBConnectionProvider connectionProvider;
-
-    /**
-     * Constructs a new {@code UserRepository} with the provided database connection provider.
-     *
-     * @param connectionProvider the {@link DBConnectionProvider} used to establish database connections
-     */
-    public UserRepository(DBConnectionProvider connectionProvider) {
-        UserRepository.connectionProvider = connectionProvider;
-    }
+    private final DataSource dataSource;
 
     /**
      * Retrieves all users from the database.
      *
      * @return a map of user emails to {@link User} objects
      */
-    public static Map<String, User> getEntities() {
+    public Map<String, User> getEntities() {
         ResultSet resultSet = null;
-        try (Connection conn = connectionProvider.getConnection();
+        try (Connection conn = dataSource.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SqlQueries.SELECT_ALL_USERS)) {
             resultSet = pstmt.executeQuery();
 
@@ -49,13 +44,7 @@ public class UserRepository {
         } catch (SQLException e) {
             System.out.println("Got SQL Exception: " + e.getMessage());
         } finally {
-            try {
-                if (resultSet != null) {
-                    resultSet.close();
-                }
-            } catch (SQLException e) {
-                System.out.println("Failed to close result set: " + e.getMessage());
-            }
+            closeResultSet(resultSet);
         }
         return new HashMap<>();
     }
@@ -65,9 +54,9 @@ public class UserRepository {
      *
      * @param user the {@link User} to be saved
      */
-    public static void save(User user) {
+    public void save(User user) {
         ResultSet generatedKeys = null;
-        try (Connection conn = connectionProvider.getConnection();
+        try (Connection conn = dataSource.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(
                         SqlQueries.INSERT_USER, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, user.getName());
@@ -82,13 +71,7 @@ public class UserRepository {
         } catch (SQLException e) {
             System.out.println("Got SQL Exception: " + e.getMessage());
         } finally {
-            try {
-                if (generatedKeys != null) {
-                    generatedKeys.close();
-                }
-            } catch (SQLException e) {
-                System.out.println("Failed to close result set: " + e.getMessage());
-            }
+            closeResultSet(generatedKeys);
         }
     }
 
@@ -98,9 +81,9 @@ public class UserRepository {
      * @param email the email address of the user to find
      * @return an {@link Optional} containing the {@link User} if found, or an empty {@link Optional}
      */
-    public static Optional<User> findByEmail(String email) {
+    public Optional<User> findByEmail(String email) {
         ResultSet resultSet = null;
-        try (Connection conn = connectionProvider.getConnection();
+        try (Connection conn = dataSource.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SqlQueries.SELECT_USER)) {
             pstmt.setString(1, email);
             resultSet = pstmt.executeQuery();
@@ -110,13 +93,7 @@ public class UserRepository {
         } catch (SQLException e) {
             System.out.println("Got SQL Exception: " + e.getMessage());
         } finally {
-            try {
-                if (resultSet != null) {
-                    resultSet.close();
-                }
-            } catch (SQLException e) {
-                System.out.println("Failed to close result set: " + e.getMessage());
-            }
+            closeResultSet(resultSet);
         }
         return Optional.empty();
     }
@@ -127,9 +104,9 @@ public class UserRepository {
      * @param email the email address to check
      * @return {@code true} if the email is already registered; {@code false} otherwise
      */
-    public static boolean emailIsAlreadyRegistered(String email) {
+    public boolean emailIsAlreadyRegistered(String email) {
         ResultSet resultSet = null;
-        try (Connection conn = connectionProvider.getConnection();
+        try (Connection conn = dataSource.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SqlQueries.SELECT_USER)) {
             pstmt.setString(1, email);
             resultSet = pstmt.executeQuery();
@@ -139,13 +116,7 @@ public class UserRepository {
         } catch (SQLException e) {
             System.out.println("Got SQL Exception: " + e.getMessage());
         }  finally {
-            try {
-                if (resultSet != null) {
-                    resultSet.close();
-                }
-            } catch (SQLException e) {
-                System.out.println("Failed to close result set: " + e.getMessage());
-            }
+            closeResultSet(resultSet);
         }
         return false;
     }
@@ -156,8 +127,8 @@ public class UserRepository {
      * @param user the {@link User} to update
      * @return {@code true} if the update was successful; {@code false} otherwise
      */
-    public static boolean update(User user) {
-        try (Connection conn = connectionProvider.getConnection();
+    public boolean update(User user) {
+        try (Connection conn = dataSource.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SqlQueries.UPDATE_USER)) {
             pstmt.setString(1, user.getName());
             pstmt.setString(2, user.getEmail());
@@ -179,8 +150,8 @@ public class UserRepository {
      * @param user the {@link User} to delete
      * @return {@code true} if the deletion was successful; {@code false} otherwise
      */
-    public static boolean delete(User user) {
-        try (Connection conn = connectionProvider.getConnection();
+    public boolean delete(User user) {
+        try (Connection conn = dataSource.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SqlQueries.DELETE_USER)) {
             pstmt.setString(1, user.getEmail());
 
@@ -192,7 +163,7 @@ public class UserRepository {
         }
     }
 
-    private static User getUserFromResultSet(ResultSet resultSet) throws SQLException {
+    private User getUserFromResultSet(ResultSet resultSet) throws SQLException {
         Long id = resultSet.getLong("id");
         String name = resultSet.getString("name");
         String email = resultSet.getString("email");
@@ -200,5 +171,15 @@ public class UserRepository {
         Role role = Role.valueOf(resultSet.getString("role"));
         boolean isBlocked = resultSet.getBoolean("is_blocked");
         return new User(id, name, email, password, role, isBlocked);
+    }
+
+    private void closeResultSet(ResultSet resultSet) {
+        if (resultSet != null) {
+            try {
+                resultSet.close();
+            } catch (SQLException e) {
+                System.out.println("Failed to close result set: " + e.getMessage());
+            }
+        }
     }
 }
