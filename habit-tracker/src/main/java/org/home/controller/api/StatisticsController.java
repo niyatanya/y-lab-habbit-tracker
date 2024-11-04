@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
+/**
+ * REST controller for handling statistics-related operations.
+ */
 @RestController
 @RequestMapping("/api/statistics")
 @RequiredArgsConstructor
@@ -23,6 +26,13 @@ public class StatisticsController {
 
     private final StatisticsService statisticsService;
 
+    /**
+     * Retrieves statistics for a specific user and habit.
+     *
+     * @param email the email of the user requesting the statistics
+     * @param input the input data for generating the statistics
+     * @return a response entity containing the generated statistics or an error message
+     */
     @PreAuthorize("#email == authentication.principal.username or hasRole('ADMIN')")
     @GetMapping(value = "/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getStatistics(@PathVariable("email") String email,

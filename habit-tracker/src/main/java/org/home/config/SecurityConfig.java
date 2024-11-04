@@ -15,6 +15,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
+/**
+ * SecurityConfig is a configuration class responsible for setting up
+ * security features in the application.
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -23,6 +27,11 @@ public class SecurityConfig {
 
     private final UserDetailsService userDetailsService;
 
+    /**
+     * Configures the security filter chain, defining security settings for the application.
+     *
+     * @return a configured SecurityFilterChain instance
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, HandlerMappingIntrospector introspector)
             throws Exception {

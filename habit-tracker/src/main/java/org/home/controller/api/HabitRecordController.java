@@ -20,6 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 import java.util.Map;
 
+/**
+ * REST controller for managing habit records.
+ */
 @RestController
 @RequestMapping("/api/records")
 @RequiredArgsConstructor
@@ -27,6 +30,13 @@ public class HabitRecordController {
 
     private final HabitRecordService recordService;
 
+    /**
+     * Retrieves all records for a specified user's habit.
+     *
+     * @param email      the email of the user whose habit records are to be retrieved
+     * @param habitTitle the title of the habit for which records are being retrieved
+     * @return a response entity containing the user's habit records
+     */
     @PreAuthorize("#email == authentication.principal.username or hasRole('ADMIN')")
     @GetMapping(value = "/{email}/{habitTitle}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAllRecords(@PathVariable("email") String email,
@@ -37,6 +47,14 @@ public class HabitRecordController {
                 .body(records);
     }
 
+    /**
+     * Creates a new record for a specified habit of a user.
+     *
+     * @param email      the email of the user for whom the record is being created
+     * @param habitTitle the title of the habit for which the record is being created
+     * @param recordDTO  the record data to be created
+     * @return a response entity containing the newly created record or a conflict error message
+     */
     @PreAuthorize("#email == authentication.principal.username or hasRole('ADMIN')")
     @PostMapping("/{email}/{habitTitle}")
     public ResponseEntity<?> createRecord(@PathVariable("email") String email,
@@ -50,6 +68,14 @@ public class HabitRecordController {
         return ResponseEntity.status(HttpStatus.CREATED).body(newRecordDTO);
     }
 
+    /**
+     * Updates an existing record for a specified habit of a user.
+     *
+     * @param email                the email of the user whose record is to be updated
+     * @param habitTitle           the title of the habit for which the record is to be updated
+     * @param recordDTOToUpdate    the updated record data
+     * @return a response entity containing the updated record or a conflict error message
+     */
     @PreAuthorize("#email == authentication.principal.username or hasRole('ADMIN')")
     @PutMapping("/{email}/{habitTitle}")
     public ResponseEntity<?> editRecord(@PathVariable("email") String email,
@@ -63,6 +89,14 @@ public class HabitRecordController {
         return ResponseEntity.ok(updatedRecordDTO);
     }
 
+    /**
+     * Deletes a specified record for a user's habit.
+     *
+     * @param email                the email of the user whose record is to be deleted
+     * @param habitTitle           the title of the habit for which the record is to be deleted
+     * @param recordDTOToDelete    the record data to be deleted
+     * @return a response entity indicating the result of the deletion operation
+     */
     @PreAuthorize("#email == authentication.principal.username or hasRole('ADMIN')")
     @DeleteMapping("/{email}/{habitTitle}")
     public ResponseEntity<?> deleteRecord(@PathVariable("email") String email,

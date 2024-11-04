@@ -20,6 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * REST controller for handling user login.
+ */
 @RestController
 @RequestMapping("/login")
 @RequiredArgsConstructor
@@ -29,6 +32,12 @@ public class LoginController {
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
 
+    /**
+     * Authenticates a user with the provided login credentials.
+     *
+     * @param inputDTO the login credentials including username and password
+     * @return a response entity containing the authentication token or an error message if authentication fails
+     */
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> loginUser(@Valid @RequestBody LoginInputDTO inputDTO) {
         User user = userService.findUserByEmail(inputDTO.getUsername());

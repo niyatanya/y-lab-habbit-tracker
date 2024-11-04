@@ -19,6 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
+/**
+ * REST controller for managing user habits.
+ */
 @RestController
 @RequestMapping("/api/habits")
 @RequiredArgsConstructor
@@ -26,6 +29,12 @@ public class HabitController {
 
     private final HabitService habitService;
 
+    /**
+     * Retrieves all habits for a specified user.
+     *
+     * @param email the email of the user whose habits are to be retrieved
+     * @return a response entity containing the user's habits
+     */
     @PreAuthorize("#email == authentication.principal.username or hasRole('ADMIN')")
     @GetMapping(value = "/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAllHabits(@PathVariable("email") String email) {
@@ -35,6 +44,13 @@ public class HabitController {
                 .body(habits);
     }
 
+    /**
+     * Creates a new habit for a specified user.
+     *
+     * @param email    the email of the user for whom the habit is being created
+     * @param habitDTO the habit data to be created
+     * @return a response entity containing the newly created habit or a conflict error message
+     */
     @PreAuthorize("#email == authentication.principal.username or hasRole('ADMIN')")
     @PostMapping(value = "/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createHabit(@PathVariable("email") String email, @Valid @RequestBody HabitDTO habitDTO) {
@@ -46,6 +62,14 @@ public class HabitController {
         return ResponseEntity.status(HttpStatus.CREATED).body(newHabitDTO);
     }
 
+    /**
+     * Updates an existing habit for a specified user.
+     *
+     * @param email                the email of the user whose habit is to be updated
+     * @param title                the title of the habit to be updated
+     * @param habitDTOToUpdate     the updated habit data
+     * @return a response entity containing the updated habit or a conflict error message
+     */
     @PreAuthorize("#email == authentication.principal.username or hasRole('ADMIN')")
     @PutMapping(value = "/{email}/{title}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> editHabit(@PathVariable("email") String email, @PathVariable("title") String title,
@@ -58,6 +82,13 @@ public class HabitController {
         return ResponseEntity.ok(updatedHabitDTO);
     }
 
+    /**
+     * Deletes a specified habit for a user.
+     *
+     * @param email the email of the user whose habit is to be deleted
+     * @param title the title of the habit to be deleted
+     * @return a response entity indicating the result of the deletion operation
+     */
     @PreAuthorize("#email == authentication.principal.username or hasRole('ADMIN')")
     @DeleteMapping(value = "/{email}/{title}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> deleteHabit(@PathVariable("email") String email, @PathVariable("title") String title) {

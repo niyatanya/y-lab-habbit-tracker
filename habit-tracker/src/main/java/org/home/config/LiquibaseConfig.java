@@ -8,6 +8,9 @@ import org.springframework.context.annotation.PropertySource;
 
 import javax.sql.DataSource;
 
+/**
+ * Configuration class for setting up Liquibase for database migrations.
+ */
 @Configuration
 @PropertySource("classpath:application.yml")
 public class LiquibaseConfig {
@@ -18,6 +21,12 @@ public class LiquibaseConfig {
     @Value("${spring.liquibase.change-log}")
     private String changeLog;
 
+    /**
+     * Creates a SpringLiquibase bean configured with the provided DataSource.
+     *
+     * @param dataSource the DataSource to be used by Liquibase for database connections
+     * @return a SpringLiquibase instance configured for database migrations
+     */
     @Bean
     public SpringLiquibase liquibase(DataSource dataSource) {
         boolean isLiquibaseEnabled = Boolean.parseBoolean(isLiquibaseEnabledStr);

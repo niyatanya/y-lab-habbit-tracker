@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
+/**
+ * REST controller for handling user registration.
+ */
 @RestController
 @RequestMapping("/register")
 @RequiredArgsConstructor
@@ -23,6 +26,12 @@ public class RegisterController {
 
     private final UserService userService;
 
+    /**
+     * Registers a new user with the provided user details.
+     *
+     * @param userCreateDTO the details of the user to be registered
+     * @return a response entity containing the created user details or an error message if registration fails
+     */
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> registerUser(@Valid @RequestBody UserCreateDTO userCreateDTO) {
         UserDTO newUserDTO = userService.register(userCreateDTO);
