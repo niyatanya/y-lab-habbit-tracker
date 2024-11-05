@@ -1,8 +1,9 @@
 package org.home.service;
 
-import org.home.config.DBConnectionProvider;
+import lombok.RequiredArgsConstructor;
 import org.home.dto.UserCreateDTO;
 import org.home.dto.UserDTO;
+import org.home.mapper.UserMapper;
 import org.home.model.User;
 import org.home.repository.UserRepository;
 import org.junit.jupiter.api.AfterAll;
@@ -10,17 +11,25 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.testcontainers.containers.PostgreSQLContainer;
+
+import javax.sql.DataSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("UserService test")
+@RequiredArgsConstructor
 class UserServiceTest {
 
     private static PostgreSQLContainer<?> testDb = new PostgreSQLContainer<>("postgres")
         .withInitScript("test-schema.sql");
 
     private UserService userService;
+    private UserRepository userRepository;
+
+    private static final UserMapper MAPPER = Mappers.getMapper(UserMapper.class);
 
     @BeforeAll
     static void beforeAll() {
@@ -34,13 +43,13 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        DBConnectionProvider connectionProvider = new DBConnectionProvider(
+        DataSource dataSource = new DriverManagerDataSource(
                 testDb.getJdbcUrl(),
                 testDb.getUsername(),
                 testDb.getPassword()
         );
-        userService = new UserService();
-        UserRepository userRepository = new UserRepository(connectionProvider);
+        userRepository = new UserRepository(dataSource);
+        userService = new UserService(MAPPER, userRepository);
     }
 
     @Test
@@ -102,7 +111,7 @@ class UserServiceTest {
 
         assertThat(updatedUser.getName()).isEqualTo("Johnny");
         assertThat(updatedUser.getEmail()).isEqualTo("johnny@example.com");
-        assertThat(UserRepository.findByEmail("johnny@example.com").get().getPassword())
+        assertThat(userRepository.findByEmail("johnny@example.com").get().getPassword())
                 .isEqualTo("newpassword123");
     }
 

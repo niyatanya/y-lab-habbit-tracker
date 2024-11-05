@@ -4,12 +4,14 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.stereotype.Component;
 
 /**
  * An aspect that logs user actions for methods or classes annotated with
  * corresponding annotation.
  */
 @Aspect
+@Component
 public class LoggableUserActionAspect {
 
     /**

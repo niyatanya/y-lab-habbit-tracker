@@ -8,7 +8,8 @@ import org.mapstruct.ReportingPolicy;
 /**
  * Mapper for converting between {@link HabitRecord} entities and {@link HabitRecordDTO} objects.
  */
-@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring",
+        unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public abstract class HabitRecordMapper {
     public abstract HabitRecordDTO toDTO(HabitRecord record);
     public abstract HabitRecord toEntity(HabitRecordDTO recordDTO);

@@ -1,7 +1,8 @@
 package org.home.service;
 
-import org.home.config.DBConnectionProvider;
 import org.home.dto.HabitDTO;
+import org.home.mapper.HabitMapper;
+import org.home.mapper.UserMapper;
 import org.home.model.Frequency;
 import org.home.model.User;
 import org.home.repository.HabitRepository;
@@ -11,7 +12,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.testcontainers.containers.PostgreSQLContainer;
+
+import javax.sql.DataSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,7 +26,9 @@ class HabitServiceTest {
     private static PostgreSQLContainer<?> testDb = new PostgreSQLContainer<>("postgres")
             .withInitScript("test-schema.sql");
 
-    private UserService userService;
+    private static final UserMapper USER_MAPPER = Mappers.getMapper(UserMapper.class);
+    private static final HabitMapper HABIT_MAPPER = Mappers.getMapper(HabitMapper.class);
+
     private HabitService habitService;
     private User user;
 
@@ -37,17 +44,18 @@ class HabitServiceTest {
 
     @BeforeEach
     void setUp() {
-        DBConnectionProvider connectionProvider = new DBConnectionProvider(
+        DataSource dataSource = new DriverManagerDataSource(
                 testDb.getJdbcUrl(),
                 testDb.getUsername(),
                 testDb.getPassword()
         );
-        userService = new UserService();
-        UserRepository userRepository = new UserRepository(connectionProvider);
-        user = userService.findUserByEmail("tu@example.com");
+        UserRepository userRepository = new UserRepository(dataSource);
+        HabitRepository habitRepository = new HabitRepository(dataSource);
 
-        habitService = new HabitService();
-        HabitRepository habitRepository = new HabitRepository(connectionProvider);
+        UserService userService = new UserService(USER_MAPPER, userRepository);
+        habitService = new HabitService(HABIT_MAPPER, userRepository, habitRepository);
+
+        user = userService.findUserByEmail("tu@example.com");
     }
 
     @Test

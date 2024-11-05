@@ -4,11 +4,13 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.stereotype.Component;
 
 /**
  * An aspect that logs the execution time of all methods in the application.
  */
 @Aspect
+@Component
 public class AllMethodsExecutionTimeAspect {
 
     /**
