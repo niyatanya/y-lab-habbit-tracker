@@ -22,3 +22,5 @@ docker compose up
 
 - [ДЗ1](https://github.com/niyatanya/y-lab-habbit-tracker/pull/1)
 - [ДЗ2](https://github.com/niyatanya/y-lab-habbit-tracker/pull/2)
+- [ДЗ3](https://github.com/niyatanya/y-lab-habbit-tracker/pull/3)
+- [ДЗ4](https://github.com/niyatanya/y-lab-habbit-tracker/pull/4)
