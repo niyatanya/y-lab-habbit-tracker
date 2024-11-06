@@ -2,7 +2,9 @@ package org.home.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.home.controller.api.LoginController;
+import org.home.dto.ErrorResponseDTO;
 import org.home.dto.LoginInputDTO;
+import org.home.dto.LoginOutputDTO;
 import org.home.model.User;
 import org.home.service.UserService;
 
@@ -18,10 +20,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @DisplayName("LoginController test")
@@ -61,11 +63,16 @@ public class LoginControllerTest {
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(null);
 
-        mockMvc.perform(post("/login")
+        String response = mockMvc.perform(post("/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(inputDTO)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").exists());
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        LoginOutputDTO loginResponse = objectMapper.readValue(response, LoginOutputDTO.class);
+        assertThat(loginResponse.getToken()).isNotNull();
     }
 
     @Test
@@ -81,10 +88,15 @@ public class LoginControllerTest {
 
         when(userService.findUserByEmail(username)).thenReturn(blockedUser);
 
-        mockMvc.perform(post("/login")
+        String response = mockMvc.perform(post("/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(inputDTO)))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("User is blocked. Access denied."));
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        ErrorResponseDTO errorResponse = objectMapper.readValue(response, ErrorResponseDTO.class);
+        assertThat(errorResponse.getError()).isEqualTo("User is blocked. Access denied.");
     }
 }

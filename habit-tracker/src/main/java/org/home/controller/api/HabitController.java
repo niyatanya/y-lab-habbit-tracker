@@ -2,6 +2,7 @@ package org.home.controller.api;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.home.dto.ErrorResponseDTO;
 import org.home.dto.HabitDTO;
 import org.home.service.HabitService;
 import org.springframework.http.HttpStatus;
@@ -57,7 +58,7 @@ public class HabitController {
         HabitDTO newHabitDTO = habitService.createHabit(email, habitDTO);
         if (newHabitDTO == null) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(Map.of("error", "Habit with this title already exists"));
+                    .body(new ErrorResponseDTO("Habit with this title already exists"));
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(newHabitDTO);
     }
@@ -77,7 +78,7 @@ public class HabitController {
         HabitDTO updatedHabitDTO = habitService.editHabit(email, title, habitDTOToUpdate);
         if (updatedHabitDTO == null) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(Map.of("error", "Habit with this title already exists"));
+                    .body(new ErrorResponseDTO("Habit with this title already exists"));
         }
         return ResponseEntity.ok(updatedHabitDTO);
     }
@@ -95,7 +96,7 @@ public class HabitController {
         boolean deleteResult = habitService.deleteHabit(email, title);
         if (!deleteResult) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", "Habit not found"));
+                    .body(new ErrorResponseDTO("Habit not found"));
         }
         return ResponseEntity.noContent().build();
     }

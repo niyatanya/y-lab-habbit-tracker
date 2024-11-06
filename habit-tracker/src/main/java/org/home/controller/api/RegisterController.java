@@ -3,6 +3,7 @@ package org.home.controller.api;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.home.annotations.LoggableUserAction;
+import org.home.dto.ErrorResponseDTO;
 import org.home.dto.UserCreateDTO;
 import org.home.dto.UserDTO;
 import org.home.service.UserService;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import java.util.Map;
 
 /**
  * REST controller for handling user registration.
@@ -37,7 +37,7 @@ public class RegisterController {
         UserDTO newUserDTO = userService.register(userCreateDTO);
         if (newUserDTO == null) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(Map.of("error", "Email is already registered"));
+                    .body(new ErrorResponseDTO("Email is already registered"));
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(newUserDTO);
     }

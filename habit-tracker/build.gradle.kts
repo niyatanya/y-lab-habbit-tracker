@@ -59,7 +59,6 @@ dependencies {
     implementation("org.springframework.security:spring-security-config:6.1.0")
     testImplementation("org.springframework.security:spring-security-test:6.1.0")
     implementation("jakarta.validation:jakarta.validation-api:3.1.0")
-    implementation("com.jayway.jsonpath:json-path:2.9.0")
 }
 
 tasks.withType<Test> {

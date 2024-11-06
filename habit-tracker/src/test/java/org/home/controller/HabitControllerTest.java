@@ -1,9 +1,13 @@
 package org.home.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.home.dto.ErrorResponseDTO;
 import org.home.dto.HabitDTO;
 import org.home.controller.api.HabitController;
 import org.home.service.HabitService;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.home.model.Frequency.DAILY;
 import java.util.Map;
 
@@ -24,7 +28,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 
@@ -58,12 +61,16 @@ public class HabitControllerTest {
 
         when(habitService.getAllHabits(email)).thenReturn(habits);
 
-        mockMvc.perform(get("/api/habits/{email}", email)
+        String response = mockMvc.perform(get("/api/habits/{email}", email)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(header().string("X-Total-Count", "2"))
-                .andExpect(jsonPath("$.Running.title").value("Running"))
-                .andExpect(jsonPath("$.Reading.title").value("Reading"));
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        Map<String, HabitDTO> habitsResponse = objectMapper.readValue(response, new TypeReference<>() { });
+        assertThat(habitsResponse).isEqualTo(habits);
     }
 
     @Test
@@ -74,12 +81,16 @@ public class HabitControllerTest {
         HabitDTO habitDTO = new HabitDTO("Exercise", "Morning exercise", DAILY);
         when(habitService.createHabit(any(), any())).thenReturn(habitDTO);
 
-        mockMvc.perform(post("/api/habits/{email}", email)
+        String response = mockMvc.perform(post("/api/habits/{email}", email)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(habitDTO)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.title").value("Exercise"))
-                .andExpect(jsonPath("$.description").value("Morning exercise"));
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        HabitDTO habitResponse = objectMapper.readValue(response, HabitDTO.class);
+        assertThat(habitResponse).isEqualTo(habitDTO);
     }
 
     @Test
@@ -90,11 +101,16 @@ public class HabitControllerTest {
         HabitDTO habitDTO = new HabitDTO("Exercise", "Morning exercise", DAILY);
         when(habitService.createHabit(email, habitDTO)).thenReturn(null);
 
-        mockMvc.perform(post("/api/habits/{email}", email)
+        String response = mockMvc.perform(post("/api/habits/{email}", email)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(habitDTO)))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.error").value("Habit with this title already exists"));
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        ErrorResponseDTO errorResponse = objectMapper.readValue(response, ErrorResponseDTO.class);
+        assertThat(errorResponse.getError()).isEqualTo("Habit with this title already exists");
     }
 
     @Test
@@ -106,12 +122,16 @@ public class HabitControllerTest {
         HabitDTO habitDTOToUpdate = new HabitDTO("Exercise", "Evening exercise", DAILY);
         when(habitService.editHabit(any(), any(), any())).thenReturn(habitDTOToUpdate);
 
-        mockMvc.perform(put("/api/habits/{email}/{title}", email, oldTitle)
+        String response = mockMvc.perform(put("/api/habits/{email}/{title}", email, oldTitle)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(habitDTOToUpdate)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.title").value("Exercise"))
-                .andExpect(jsonPath("$.description").value("Evening exercise"));
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        HabitDTO habitResponse = objectMapper.readValue(response, HabitDTO.class);
+        assertThat(habitResponse).isEqualTo(habitDTOToUpdate);
     }
 
     @Test
@@ -124,11 +144,16 @@ public class HabitControllerTest {
 
         when(habitService.editHabit(any(), any(), any())).thenReturn(null);
 
-        mockMvc.perform(put("/api/habits/{email}/{title}", email, oldTitle)
+        String response = mockMvc.perform(put("/api/habits/{email}/{title}", email, oldTitle)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(habitDTOToUpdate)))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.error").value("Habit with this title already exists"));
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        ErrorResponseDTO errorResponse = objectMapper.readValue(response, ErrorResponseDTO.class);
+        assertThat(errorResponse.getError()).isEqualTo("Habit with this title already exists");
     }
 
     @Test
@@ -154,9 +179,14 @@ public class HabitControllerTest {
 
         when(habitService.deleteHabit(email, title)).thenReturn(false);
 
-        mockMvc.perform(delete("/api/habits/{email}/{title}", email, title)
+        String response = mockMvc.perform(delete("/api/habits/{email}/{title}", email, title)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error").value("Habit not found"));
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        ErrorResponseDTO errorResponse = objectMapper.readValue(response, ErrorResponseDTO.class);
+        assertThat(errorResponse.getError()).isEqualTo("Habit not found");
     }
 }

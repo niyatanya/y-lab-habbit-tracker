@@ -3,6 +3,7 @@ package org.home.controller.api;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.home.annotations.LoggableUserAction;
+import org.home.dto.ErrorResponseDTO;
 import org.home.dto.UserCreateDTO;
 import org.home.dto.UserDTO;
 import org.home.model.User;
@@ -20,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -40,9 +40,8 @@ public class UserController {
      */
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<UserDTO>> getAllUsers() {
-        Map<String, UserDTO> userMap = userService.getAllUsers();
-        List<UserDTO> users = userMap.values().stream().toList();
+    public ResponseEntity<Map<String, UserDTO>> getAllUsers() {
+        Map<String, UserDTO> users = userService.getAllUsers();
         return ResponseEntity.ok()
                 .header("X-Total-Count", String.valueOf(users.size()))
                 .body(users);
@@ -65,7 +64,7 @@ public class UserController {
         UserDTO updatedUserDTO = userService.editProfile(email, userCreateDTO);
         return updatedUserDTO != null
                 ? ResponseEntity.ok(updatedUserDTO)
-                : ResponseEntity.status(409).body(Map.of("error", "Email is already registered"));
+                : ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponseDTO("Email is already registered"));
     }
 
     /**
@@ -81,40 +80,55 @@ public class UserController {
         boolean deleteResult = userService.deleteUser(email);
         return deleteResult
                 ? ResponseEntity.noContent().build()
-                : ResponseEntity.status(403).body(Map.of("error", "Cannot delete an admin user."));
+                : ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                        new ErrorResponseDTO("Cannot delete an admin user."));
     }
 
     /**
-     * Performs an administrative action on a user.
+     * A method to block a user.
      *
-     * @param action the action to be performed (block or unblock)
-     * @param email the email of the user on whom the action is to be performed
+     * @param email the email of the user to be blocked
      * @return a response entity indicating the result of the action
      */
-    @PutMapping(value = "/{action}/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/block/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> adminAction(@PathVariable("action") String action, @PathVariable("email") String email) {
+    public ResponseEntity<?> blockUser(@PathVariable("email") String email) {
         User user = userService.findUserByEmail(email);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", "Cannot find user with this email: " + email));
+                    .body(new ErrorResponseDTO("Cannot find user with this email: " + email));
         }
 
-        boolean success;
-        if ("block".equalsIgnoreCase(action)) {
-            success = userService.blockUser(user);
-        } else if ("unblock".equalsIgnoreCase(action)) {
-            success = userService.unblockUser(user);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", "Invalid action. Use 'block' or 'unblock'."));
-        }
-
+        boolean success = userService.blockUser(user);
         if (success) {
-            return ResponseEntity.ok(Map.of("message", "User " + action + "ed successfully."));
+            return ResponseEntity.ok(Map.of("message", "User blocked successfully."));
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", "User not found or already " + action + "ed."));
+                    .body(new ErrorResponseDTO("User not found or already blocked."));
+        }
+    }
+
+    /**
+     * A method to unblock a user.
+     *
+     * @param email the email of the user to be unblocked
+     * @return a response entity indicating the result of the action
+     */
+    @PutMapping(value = "/unblock/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> unblockUser(@PathVariable("email") String email) {
+        User user = userService.findUserByEmail(email);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorResponseDTO("Cannot find user with this email: " + email));
+        }
+
+        boolean success = userService.unblockUser(user);
+        if (success) {
+            return ResponseEntity.ok(Map.of("message", "User unblocked successfully."));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorResponseDTO("User not found or already unblocked."));
         }
     }
 }

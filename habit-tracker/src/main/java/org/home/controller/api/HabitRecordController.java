@@ -2,6 +2,7 @@ package org.home.controller.api;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.home.dto.ErrorResponseDTO;
 import org.home.dto.HabitRecordDTO;
 import org.home.service.HabitRecordService;
 import org.springframework.http.HttpStatus;
@@ -63,7 +64,7 @@ public class HabitRecordController {
         HabitRecordDTO newRecordDTO = recordService.createRecord(email, habitTitle, recordDTO);
         if (newRecordDTO == null) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(Map.of("error", "Record with this date already exists"));
+                    .body(new ErrorResponseDTO("Record with this date already exists"));
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(newRecordDTO);
     }
@@ -84,7 +85,7 @@ public class HabitRecordController {
         HabitRecordDTO updatedRecordDTO = recordService.editRecord(email, habitTitle, recordDTOToUpdate);
         if (updatedRecordDTO == null) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(Map.of("error", "Record with this completion status already exists"));
+                    .body(new ErrorResponseDTO("Record with this completion status already exists"));
         }
         return ResponseEntity.ok(updatedRecordDTO);
     }
@@ -104,8 +105,7 @@ public class HabitRecordController {
                                           @Valid @RequestBody HabitRecordDTO recordDTOToDelete) {
         boolean deleteResult = recordService.deleteRecord(email, habitTitle, recordDTOToDelete);
         if (!deleteResult) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", "Record not found"));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponseDTO("Record not found"));
         }
         return ResponseEntity.noContent().build();
     }

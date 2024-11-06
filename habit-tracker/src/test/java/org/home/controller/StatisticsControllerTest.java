@@ -1,7 +1,9 @@
 package org.home.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.home.controller.api.StatisticsController;
+import org.home.dto.ErrorResponseDTO;
 import org.home.dto.StatisticsInputDTO;
 import org.home.service.StatisticsService;
 import java.util.Map;
@@ -17,9 +19,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
@@ -57,14 +59,17 @@ public class StatisticsControllerTest {
 
         when(statisticsService.generateProgressReport(any(StatisticsInputDTO.class))).thenReturn(mockResponse);
 
-        mockMvc.perform(get("/api/statistics/{email}", email)
+        String response = mockMvc.perform(get("/api/statistics/{email}", email)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(inputDTO)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.['Progress Report for Habit: Exercise'].['Success Rate']")
-                        .value("80%"))
-                .andExpect(jsonPath("$.['Progress Report for Habit: Exercise'].['Current Streak']")
-                        .value("5 days"));
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        Map<String, Map<String, String>> statResponse = objectMapper.readValue(response,
+                new TypeReference<Map<String, Map<String, String>>>() { });
+        assertThat(statResponse).isEqualTo(mockResponse);
     }
 
     @Test
@@ -82,11 +87,15 @@ public class StatisticsControllerTest {
 
         when(statisticsService.generateProgressReport(any(StatisticsInputDTO.class))).thenReturn(mockErrorResponse);
 
-        mockMvc.perform(get("/api/statistics/{email}", email)
+        String response = mockMvc.perform(get("/api/statistics/{email}", email)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(inputDTO)))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.['Progress Report for Habit: NonExistentHabit'].['Error: ']")
-                        .value("Habit not found"));
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        ErrorResponseDTO errorResponse = objectMapper.readValue(response, ErrorResponseDTO.class);
+        assertThat(errorResponse.getError()).isEqualTo("Habit not found");
     }
 }

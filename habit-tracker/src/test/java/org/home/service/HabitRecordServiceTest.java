@@ -10,6 +10,12 @@ import org.home.model.User;
 import org.home.repository.HabitRecordRepository;
 import org.home.repository.HabitRepository;
 import org.home.repository.UserRepository;
+import org.home.repository.jdbc.JdbcHabitRecordRepository;
+import org.home.repository.jdbc.JdbcHabitRepository;
+import org.home.repository.jdbc.JdbcUserRepository;
+import org.home.service.impl.HabitRecordServiceImpl;
+import org.home.service.impl.HabitServiceImpl;
+import org.home.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +41,7 @@ public class HabitRecordServiceTest {
     private static final HabitRecordMapper RECORD_MAPPER = Mappers.getMapper(HabitRecordMapper.class);
 
     private HabitRecordService recordService;
+    private HabitRecordRepository recordRepository;
     private User user;
     private Habit habit;
 
@@ -55,16 +62,16 @@ public class HabitRecordServiceTest {
                 testDb.getUsername(),
                 testDb.getPassword()
         );
-        UserRepository userRepository = new UserRepository(dataSource);
-        HabitRepository habitRepository = new HabitRepository(dataSource);
-        HabitRecordRepository recordRepository = new HabitRecordRepository(dataSource);
+        UserRepository userRepository = new JdbcUserRepository(dataSource);
+        HabitRepository habitRepository = new JdbcHabitRepository(dataSource);
+        recordRepository = new JdbcHabitRecordRepository(dataSource);
 
-        UserService userService = new UserService(USER_MAPPER, userRepository);
-        HabitService habitService = new HabitService(HABIT_MAPPER, userRepository, habitRepository);
-        recordService = new HabitRecordService(RECORD_MAPPER, userRepository, habitRepository, recordRepository);
+        UserService userService = new UserServiceImpl(USER_MAPPER, userRepository);
+        HabitService habitService = new HabitServiceImpl(HABIT_MAPPER, userRepository, habitRepository);
+        recordService = new HabitRecordServiceImpl(RECORD_MAPPER, userRepository, habitRepository, recordRepository);
 
         user = userService.findUserByEmail("tu@example.com");
-        habit = habitService.findByTitleAndUserId(user, "Go to shower");
+        habit = habitRepository.findByTitleAndUserId("Go to shower", user.getId()).orElseThrow();
     }
 
     @Test
@@ -95,7 +102,7 @@ public class HabitRecordServiceTest {
         HabitRecordDTO newRecordDTO = new HabitRecordDTO(date, newCompleted);
         recordService.editRecord(user.getEmail(), habit.getTitle(), newRecordDTO);
 
-        HabitRecord editedRecord = recordService.findByDateAndHabitId(habit, date);
+        HabitRecord editedRecord = recordRepository.findByDateAndHabitId(date, habit.getId()).orElseThrow();
 
         assertThat(editedRecord).isNotNull();
         assertThat(editedRecord.isCompleted()).isEqualTo(newCompleted);

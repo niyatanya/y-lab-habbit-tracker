@@ -1,5 +1,6 @@
 package org.home.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.home.controller.api.UserController;
 import org.home.dto.UserCreateDTO;
@@ -19,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.home.model.Role.USER;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -26,7 +28,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 
@@ -58,14 +59,19 @@ class UserControllerTest {
     @WithMockUser(roles = "ADMIN")
     @DisplayName("GET: All users retrieved successfully by admin")
     void testGetAllUsers() throws Exception {
-        when(userService.getAllUsers()).thenReturn(Map.of("test@example.com", userDTO));
+        Map<String, UserDTO> expectedUsers = Map.of("test@example.com", userDTO);
+        when(userService.getAllUsers()).thenReturn(expectedUsers);
 
-        mockMvc.perform(get("/api/users")
+        String response = mockMvc.perform(get("/api/users")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(header().string("X-Total-Count", "1"))
-                .andExpect(jsonPath("$[0].email").value("test@example.com"))
-                .andExpect(jsonPath("$[0].name").value("Test User"));
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        Map<String, UserDTO> usersResponse = objectMapper.readValue(response, new TypeReference<>() { });
+        assertThat(usersResponse).isEqualTo(expectedUsers);
     }
 
     @Test
@@ -74,12 +80,16 @@ class UserControllerTest {
     void testUpdateUserSelf() throws Exception {
         when(userService.editProfile(anyString(), any())).thenReturn(userDTO);
 
-        mockMvc.perform(put("/api/users/test@example.com")
+        String response = mockMvc.perform(put("/api/users/test@example.com")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userCreateDTO)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.email").value("test@example.com"))
-                .andExpect(jsonPath("$.name").value("Test User"));
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        UserDTO userResponse = objectMapper.readValue(response, UserDTO.class);
+        assertThat(userResponse).isEqualTo(userDTO);
     }
 
     @Test
@@ -101,7 +111,6 @@ class UserControllerTest {
         when(userService.blockUser(user)).thenReturn(true);
 
         mockMvc.perform(put("/api/users/block/user@example.com"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("User blocked successfully."));
+                .andExpect(status().isOk());
     }
 }

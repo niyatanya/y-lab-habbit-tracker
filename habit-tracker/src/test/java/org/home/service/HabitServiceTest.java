@@ -7,6 +7,10 @@ import org.home.model.Frequency;
 import org.home.model.User;
 import org.home.repository.HabitRepository;
 import org.home.repository.UserRepository;
+import org.home.repository.jdbc.JdbcHabitRepository;
+import org.home.repository.jdbc.JdbcUserRepository;
+import org.home.service.impl.HabitServiceImpl;
+import org.home.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,11 +53,11 @@ class HabitServiceTest {
                 testDb.getUsername(),
                 testDb.getPassword()
         );
-        UserRepository userRepository = new UserRepository(dataSource);
-        HabitRepository habitRepository = new HabitRepository(dataSource);
+        UserRepository userRepository = new JdbcUserRepository(dataSource);
+        HabitRepository habitRepository = new JdbcHabitRepository(dataSource);
 
-        UserService userService = new UserService(USER_MAPPER, userRepository);
-        habitService = new HabitService(HABIT_MAPPER, userRepository, habitRepository);
+        UserService userService = new UserServiceImpl(USER_MAPPER, userRepository);
+        habitService = new HabitServiceImpl(HABIT_MAPPER, userRepository, habitRepository);
 
         user = userService.findUserByEmail("tu@example.com");
     }

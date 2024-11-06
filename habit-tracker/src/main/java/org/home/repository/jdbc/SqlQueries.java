@@ -1,4 +1,4 @@
-package org.home.repository;
+package org.home.repository.jdbc;
 
 public final class SqlQueries {
 

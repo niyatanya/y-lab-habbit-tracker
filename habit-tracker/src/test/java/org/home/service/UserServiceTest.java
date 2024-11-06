@@ -6,6 +6,8 @@ import org.home.dto.UserDTO;
 import org.home.mapper.UserMapper;
 import org.home.model.User;
 import org.home.repository.UserRepository;
+import org.home.repository.jdbc.JdbcUserRepository;
+import org.home.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,8 +50,8 @@ class UserServiceTest {
                 testDb.getUsername(),
                 testDb.getPassword()
         );
-        userRepository = new UserRepository(dataSource);
-        userService = new UserService(MAPPER, userRepository);
+        userRepository = new JdbcUserRepository(dataSource);
+        userService = new UserServiceImpl(MAPPER, userRepository);
     }
 
     @Test

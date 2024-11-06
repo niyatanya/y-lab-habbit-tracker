@@ -8,6 +8,13 @@ import org.home.model.User;
 import org.home.repository.HabitRecordRepository;
 import org.home.repository.HabitRepository;
 import org.home.repository.UserRepository;
+import org.home.repository.jdbc.JdbcHabitRecordRepository;
+import org.home.repository.jdbc.JdbcHabitRepository;
+import org.home.repository.jdbc.JdbcUserRepository;
+import org.home.service.impl.HabitRecordServiceImpl;
+import org.home.service.impl.HabitServiceImpl;
+import org.home.service.impl.StatisticsServiceImpl;
+import org.home.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,18 +59,18 @@ public class StatisticsServiceTest {
                 testDb.getUsername(),
                 testDb.getPassword()
         );
-        UserRepository userRepository = new UserRepository(dataSource);
-        HabitRepository habitRepository = new HabitRepository(dataSource);
-        HabitRecordRepository recordRepository = new HabitRecordRepository(dataSource);
+        UserRepository userRepository = new JdbcUserRepository(dataSource);
+        HabitRepository habitRepository = new JdbcHabitRepository(dataSource);
+        HabitRecordRepository recordRepository = new JdbcHabitRecordRepository(dataSource);
 
-        UserService userService = new UserService(USER_MAPPER, userRepository);
-        HabitService habitService = new HabitService(HABIT_MAPPER, userRepository, habitRepository);
-        HabitRecordService recordService = new HabitRecordService(
+        UserService userService = new UserServiceImpl(USER_MAPPER, userRepository);
+        HabitService habitService = new HabitServiceImpl(HABIT_MAPPER, userRepository, habitRepository);
+        HabitRecordService recordService = new HabitRecordServiceImpl(
                 RECORD_MAPPER, userRepository, habitRepository, recordRepository);
-        statisticsService = new StatisticsService(userRepository, habitRepository, recordRepository);
+        statisticsService = new StatisticsServiceImpl(userRepository, habitRepository, recordRepository);
 
         user = userService.findUserByEmail("tu@example.com");
-        habit = habitService.findByTitleAndUserId(user, "Go to shower");
+        habit = habitRepository.findByTitleAndUserId("Go to shower", user.getId()).orElseThrow();
     }
 
     @Test
