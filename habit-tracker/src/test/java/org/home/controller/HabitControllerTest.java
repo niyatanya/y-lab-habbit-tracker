@@ -11,16 +11,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.home.model.Frequency.DAILY;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -31,24 +29,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 
+@WebMvcTest(controllers = HabitController.class)
 @DisplayName("HabitController test")
 public class HabitControllerTest {
 
+    @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
-    @Mock
+    @MockBean
     private HabitService habitService;
-
-    @InjectMocks
-    private HabitController habitController;
-
-    @BeforeEach
-    void setup() {
-        MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(habitController).build();
-        objectMapper = new ObjectMapper();
-    }
 
     @Test
     @WithMockUser(username = "user@example.com", roles = "USER")

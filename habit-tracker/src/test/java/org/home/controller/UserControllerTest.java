@@ -9,16 +9,15 @@ import org.home.model.User;
 import org.home.service.UserService;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.home.model.Role.USER;
@@ -31,26 +30,24 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 
+@WebMvcTest(controllers = UserController.class)
 @DisplayName("UserController test")
 class UserControllerTest {
 
+    @Autowired
     private MockMvc mockMvc;
 
-    @Mock
+    @MockBean
     private UserService userService;
 
-    @InjectMocks
-    private UserController userController;
-
+    @Autowired
     private ObjectMapper objectMapper;
+
     private UserDTO userDTO;
     private UserCreateDTO userCreateDTO;
 
     @BeforeEach
     void setup() {
-        MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(userController).build();
-        objectMapper = new ObjectMapper();
         userDTO = new UserDTO("Test User", "test@example.com");
         userCreateDTO = new UserCreateDTO("New User", "new@example.com", "password123");
     }

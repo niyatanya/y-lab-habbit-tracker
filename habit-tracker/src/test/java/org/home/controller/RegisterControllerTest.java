@@ -7,15 +7,13 @@ import org.home.dto.UserCreateDTO;
 import org.home.dto.UserDTO;
 import org.home.service.UserService;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -23,24 +21,18 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@WebMvcTest(controllers = RegisterController.class)
 @DisplayName("RegisterController test")
 public class RegisterControllerTest {
 
+    @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
-    @Mock
+    @MockBean
     private UserService userService;
-
-    @InjectMocks
-    private RegisterController registerController;
-
-    @BeforeEach
-    void setup() {
-        MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(registerController).build();
-        objectMapper = new ObjectMapper();
-    }
 
     @Test
     @DisplayName("User registered successfully")

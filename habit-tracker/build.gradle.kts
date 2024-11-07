@@ -3,10 +3,11 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
     id("java")
-    id("war")
     id("checkstyle")
     id("io.freefair.lombok") version "8.6"
     id("io.freefair.aspectj.post-compile-weaving") version "8.6"
+    id("org.springframework.boot") version "3.2.0"
+    id("io.spring.dependency-management") version "1.1.6"
 }
 
 java {
@@ -23,19 +24,27 @@ repositories {
 }
 
 dependencies {
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+    implementation("org.springframework.boot:spring-boot-starter-aop")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.assertj:assertj-core:3.22.0")
     testImplementation("org.testcontainers:testcontainers:1.19.0")
     testImplementation("org.testcontainers:junit-jupiter:1.19.0")
     testImplementation("org.testcontainers:postgresql:1.19.0")
-    implementation("org.postgresql:postgresql:42.7.2")
-    implementation("org.liquibase:liquibase-core:4.24.0")
+    implementation("org.postgresql:postgresql")
+    implementation("org.liquibase:liquibase-core")
 
-    compileOnly("jakarta.servlet:jakarta.servlet-api:6.0.0")
-    implementation("org.apache.tomcat:tomcat-servlet-api:11.0.0")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.2")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.2")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
+    implementation("com.fasterxml.jackson.core:jackson-core:2.15.2")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.15.2")
 
     implementation("org.mapstruct:mapstruct:1.5.5.Final")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
@@ -48,11 +57,6 @@ dependencies {
 
     implementation("org.aspectj:aspectjrt:1.9.21.1")
     implementation("org.aspectj:aspectjweaver:1.9.21.1")
-
-    implementation("org.springframework:spring-context:6.1.0")
-    implementation("org.springframework:spring-web:6.1.0")
-    implementation("org.springframework:spring-webmvc:6.1.0")
-    implementation("org.springframework:spring-jdbc:6.1.0")
 
     implementation("org.springframework.security:spring-security-core:6.1.0")
     implementation("org.springframework.security:spring-security-web:6.1.0")
@@ -77,10 +81,6 @@ tasks.withType<Test> {
         showCauses = true
         showStackTraces = true
     }
-}
-
-tasks.war {
-    archiveFileName.set("habit-tracker.war")
 }
 
 tasks.withType<JavaCompile> {
