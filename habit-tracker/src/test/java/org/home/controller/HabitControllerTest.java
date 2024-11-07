@@ -2,6 +2,8 @@ package org.home.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import org.home.dto.ErrorResponseDTO;
 import org.home.dto.HabitDTO;
 import org.home.controller.api.HabitController;
@@ -11,15 +13,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.home.model.Frequency.DAILY;
 import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static org.home.model.Role.USER;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -42,11 +45,20 @@ public class HabitControllerTest {
     @MockBean
     private HabitService habitService;
 
+    private String email;
+    private Claims userClaims;
+
+    @BeforeEach
+    void setup() {
+        email = "user@example.com";
+        userClaims = Jwts.claims();
+        userClaims.put("username", email);
+        userClaims.put("role", USER);
+    }
+
     @Test
-    @WithMockUser(username = "user@example.com", roles = "USER")
     @DisplayName("All habits retrieved successfully")
     void testGetAllHabitsIsSuccess() throws Exception {
-        String email = "user@example.com";
         Map<String, HabitDTO> habits = Map.of(
                 "Running", new HabitDTO("Running", "Daily morning run", DAILY),
                 "Reading", new HabitDTO("Reading", "Read 30 pages", DAILY));
@@ -54,7 +66,8 @@ public class HabitControllerTest {
         when(habitService.getAllHabits(email)).thenReturn(habits);
 
         String response = mockMvc.perform(get("/api/habits/{email}", email)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .requestAttr("claims", userClaims))
                 .andExpect(status().isOk())
                 .andExpect(header().string("X-Total-Count", "2"))
                 .andReturn()
@@ -66,16 +79,15 @@ public class HabitControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "user@example.com", roles = "USER")
     @DisplayName("Habit created successfully")
     void testCreateHabitIsSuccess() throws Exception {
-        String email = "user@example.com";
         HabitDTO habitDTO = new HabitDTO("Exercise", "Morning exercise", DAILY);
         when(habitService.createHabit(any(), any())).thenReturn(habitDTO);
 
         String response = mockMvc.perform(post("/api/habits/{email}", email)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(habitDTO)))
+                        .content(objectMapper.writeValueAsString(habitDTO))
+                        .requestAttr("claims", userClaims))
                 .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
@@ -86,16 +98,15 @@ public class HabitControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "user@example.com", roles = "USER")
     @DisplayName("Title already exists, habit creation failed")
     void testCreateHabitTitleConflict() throws Exception {
-        String email = "user@example.com";
         HabitDTO habitDTO = new HabitDTO("Exercise", "Morning exercise", DAILY);
         when(habitService.createHabit(email, habitDTO)).thenReturn(null);
 
         String response = mockMvc.perform(post("/api/habits/{email}", email)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(habitDTO)))
+                        .content(objectMapper.writeValueAsString(habitDTO))
+                        .requestAttr("claims", userClaims))
                 .andExpect(status().isConflict())
                 .andReturn()
                 .getResponse()
@@ -106,17 +117,16 @@ public class HabitControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "user@example.com", roles = "USER")
     @DisplayName("Habit edited successfully")
     void testEditHabitIsSuccess() throws Exception {
-        String email = "user@example.com";
         String oldTitle = "Exercise";
         HabitDTO habitDTOToUpdate = new HabitDTO("Exercise", "Evening exercise", DAILY);
         when(habitService.editHabit(any(), any(), any())).thenReturn(habitDTOToUpdate);
 
         String response = mockMvc.perform(put("/api/habits/{email}/{title}", email, oldTitle)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(habitDTOToUpdate)))
+                        .content(objectMapper.writeValueAsString(habitDTOToUpdate))
+                        .requestAttr("claims", userClaims))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -127,10 +137,8 @@ public class HabitControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "user@example.com", roles = "USER")
     @DisplayName("Title already exists, habit editing failed")
     void testEditHabitTitleConflict() throws Exception {
-        String email = "user@example.com";
         String oldTitle = "Exercise";
         HabitDTO habitDTOToUpdate = new HabitDTO("Exercise", "Evening exercise", DAILY);
 
@@ -138,7 +146,8 @@ public class HabitControllerTest {
 
         String response = mockMvc.perform(put("/api/habits/{email}/{title}", email, oldTitle)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(habitDTOToUpdate)))
+                        .content(objectMapper.writeValueAsString(habitDTOToUpdate))
+                        .requestAttr("claims", userClaims))
                 .andExpect(status().isConflict())
                 .andReturn()
                 .getResponse()
@@ -149,30 +158,28 @@ public class HabitControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "user@example.com", roles = "USER")
     @DisplayName("Habit deleted successfully")
     void testDeleteHabitIsSuccess() throws Exception {
-        String email = "user@example.com";
         String title = "Exercise";
 
         when(habitService.deleteHabit(email, title)).thenReturn(true);
 
         mockMvc.perform(delete("/api/habits/{email}/{title}", email, title)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .requestAttr("claims", userClaims))
                 .andExpect(status().isNoContent());
     }
 
     @Test
-    @WithMockUser(username = "user@example.com", roles = "USER")
     @DisplayName("Title not found, habit deletion failed")
     void testDeleteHabitNotFound() throws Exception {
-        String email = "user@example.com";
         String title = "Exercise";
 
         when(habitService.deleteHabit(email, title)).thenReturn(false);
 
         String response = mockMvc.perform(delete("/api/habits/{email}/{title}", email, title)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .requestAttr("claims", userClaims))
                 .andExpect(status().isNotFound())
                 .andReturn()
                 .getResponse()

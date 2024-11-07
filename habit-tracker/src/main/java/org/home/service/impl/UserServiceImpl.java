@@ -8,9 +8,6 @@ import org.home.mapper.UserMapper;
 import org.home.model.User;
 import org.home.repository.UserRepository;
 import org.home.service.UserService;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -22,7 +19,7 @@ import static org.home.model.Role.USER;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserDetailsService, UserService {
+public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
     private final UserRepository userRepository;
@@ -122,16 +119,5 @@ public class UserServiceImpl implements UserDetailsService, UserService {
             userRepository.update(user);
             return true;
         }
-    }
-
-    @Override
-    @LoggableUserAction
-    public boolean validatePassword(User user, String password) {
-        return user.getPassword().equals(password);
-    }
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return findUserByEmail(username);
     }
 }

@@ -2,6 +2,8 @@ package org.home.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import org.home.controller.api.StatisticsController;
 import org.home.dto.ErrorResponseDTO;
 import org.home.dto.StatisticsInputDTO;
@@ -10,16 +12,17 @@ import org.home.service.StatisticsService;
 import java.time.LocalDate;
 import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.home.model.Role.USER;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -38,11 +41,20 @@ public class StatisticsControllerTest {
     @MockBean
     private StatisticsService statisticsService;
 
+    private String email;
+    private Claims userClaims;
+
+    @BeforeEach
+    void setup() {
+        email = "user@example.com";
+        userClaims = Jwts.claims();
+        userClaims.put("username", email);
+        userClaims.put("role", USER);
+    }
+
     @Test
-    @WithMockUser(username = "user@example.com", roles = "USER")
     @DisplayName("Statistics retrieved successfully")
     void testGetStatisticsSuccess() throws Exception {
-        String email = "user@example.com";
         StatisticsInputDTO inputDTO = new StatisticsInputDTO(email, "Exercise",
                 LocalDate.of(2024, 10, 10),
                 LocalDate.of(2024, 10, 15));
@@ -56,7 +68,8 @@ public class StatisticsControllerTest {
 
         String response = mockMvc.perform(get("/api/statistics/{email}", email)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(inputDTO)))
+                        .content(objectMapper.writeValueAsString(inputDTO))
+                        .requestAttr("claims", userClaims))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -68,10 +81,8 @@ public class StatisticsControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "user@example.com", roles = "USER")
     @DisplayName("Statistics not found")
     void testGetStatisticsNotFound() throws Exception {
-        String email = "user@example.com";
         StatisticsInputDTO inputDTO = new StatisticsInputDTO(email, "NonExistentHabit",
                 LocalDate.of(2024, 11, 1),
                 LocalDate.of(2024, 11, 5));
@@ -86,7 +97,8 @@ public class StatisticsControllerTest {
 
         String response = mockMvc.perform(get("/api/statistics/{email}", email)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(inputDTO)))
+                        .content(objectMapper.writeValueAsString(inputDTO))
+                        .requestAttr("claims", userClaims))
                 .andExpect(status().isNotFound())
                 .andReturn()
                 .getResponse()

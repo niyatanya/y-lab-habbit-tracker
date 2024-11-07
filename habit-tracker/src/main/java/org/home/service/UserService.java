@@ -76,13 +76,4 @@ public interface UserService {
      * @return a message indicating the result of the operation
      */
     boolean unblockUser(User user);
-
-    /**
-     * Validates the password of a user.
-     *
-     * @param user The {@link User} whose password is being validated.
-     * @param password The password to validate.
-     * @return {@code true} if the password is correct; {@code false} otherwise.
-     */
-    boolean validatePassword(User user, String password);
 }

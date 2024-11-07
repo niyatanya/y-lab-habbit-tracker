@@ -58,10 +58,9 @@ dependencies {
     implementation("org.aspectj:aspectjrt:1.9.21.1")
     implementation("org.aspectj:aspectjweaver:1.9.21.1")
 
-    implementation("org.springframework.security:spring-security-core:6.1.0")
-    implementation("org.springframework.security:spring-security-web:6.1.0")
-    implementation("org.springframework.security:spring-security-config:6.1.0")
-    testImplementation("org.springframework.security:spring-security-test:6.1.0")
+    implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+    implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
+    implementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
     implementation("jakarta.validation:jakarta.validation-api:3.1.0")
 }
 

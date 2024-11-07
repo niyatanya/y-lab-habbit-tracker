@@ -3,6 +3,8 @@ package org.home.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import org.home.controller.api.HabitRecordController;
 import org.home.dto.ErrorResponseDTO;
 import org.home.dto.HabitRecordDTO;
@@ -14,13 +16,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.home.model.Role.USER;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -45,17 +47,24 @@ public class HabitRecordControllerTest {
     @MockBean
     private HabitRecordService recordService;
 
+    private String email;
+    private String habitTitle;
+    private Claims userClaims;
+
     @BeforeEach
     void setup() {
         objectMapper.registerModule(new JavaTimeModule());
+        email = "user@example.com";
+        habitTitle = "Exercise";
+
+        userClaims = Jwts.claims();
+        userClaims.put("username", email);
+        userClaims.put("role", USER);
     }
 
     @Test
-    @WithMockUser(username = "user@example.com", roles = "USER")
     @DisplayName("All records of a habit retrieved successfully")
     void testGetAllRecordsIsSuccess() throws Exception {
-        String email = "user@example.com";
-        String habitTitle = "Exercise";
         Map<LocalDate, HabitRecordDTO> records = Map.of(
                 LocalDate.of(2024, 11, 1),
                 new HabitRecordDTO(LocalDate.of(2024, 11, 1), true),
@@ -65,7 +74,8 @@ public class HabitRecordControllerTest {
         when(recordService.getAllRecords(email, habitTitle)).thenReturn(records);
 
         String response = mockMvc.perform(get("/api/records/{email}/{habitTitle}", email, habitTitle)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .requestAttr("claims", userClaims))
                 .andExpect(status().isOk())
                 .andExpect(header().string("X-Total-Count", "2"))
                 .andReturn()
@@ -77,18 +87,16 @@ public class HabitRecordControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "user@example.com", roles = "USER")
     @DisplayName("Record created successfully")
     void testCreateRecordIsSuccess() throws Exception {
-        String email = "user@example.com";
-        String habitTitle = "Exercise";
         HabitRecordDTO recordDTO = new HabitRecordDTO(LocalDate.of(2024, 11, 3), true);
 
         when(recordService.createRecord(eq(email), eq(habitTitle), any())).thenReturn(recordDTO);
 
         String response = mockMvc.perform(post("/api/records/{email}/{habitTitle}", email, habitTitle)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"date\":\"2024-11-03\", \"completed\":true}"))
+                        .content("{\"date\":\"2024-11-03\", \"completed\":true}")
+                        .requestAttr("claims", userClaims))
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andReturn()
@@ -100,18 +108,14 @@ public class HabitRecordControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "user@example.com", roles = "USER")
     @DisplayName("Date already exists, record creation failed")
     void testCreateRecordConflict() throws Exception {
-        String email = "user@example.com";
-        String habitTitle = "Exercise";
-        HabitRecordDTO recordDTO = new HabitRecordDTO(LocalDate.of(2024, 11, 3), true);
-
         when(recordService.createRecord(eq(email), eq(habitTitle), any())).thenReturn(null);
 
         String response = mockMvc.perform(post("/api/records/{email}/{habitTitle}", email, habitTitle)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"date\":\"2024-11-03\", \"completed\":true}"))
+                        .content("{\"date\":\"2024-11-03\", \"completed\":true}")
+                        .requestAttr("claims", userClaims))
                 .andExpect(status().isConflict())
                 .andReturn()
                 .getResponse()
@@ -122,11 +126,8 @@ public class HabitRecordControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "user@example.com", roles = "USER")
     @DisplayName("Record edited successfully")
     void testEditRecordIsSuccess() throws Exception {
-        String email = "user@example.com";
-        String habitTitle = "Exercise";
         HabitRecordDTO recordDTOToUpdate = new HabitRecordDTO(
                 LocalDate.of(2024, 10, 30), false);
 
@@ -134,7 +135,8 @@ public class HabitRecordControllerTest {
 
         String response = mockMvc.perform(put("/api/records/{email}/{habitTitle}", email, habitTitle)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"date\":\"2024-10-30\", \"completed\":false}"))
+                        .content("{\"date\":\"2024-10-30\", \"completed\":false}")
+                        .requestAttr("claims", userClaims))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -145,19 +147,14 @@ public class HabitRecordControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "user@example.com", roles = "USER")
     @DisplayName("Date already exists, record editing failed")
     void testEditRecordConflict() throws Exception {
-        String email = "user@example.com";
-        String habitTitle = "Exercise";
-        HabitRecordDTO recordDTOToUpdate = new HabitRecordDTO(
-                LocalDate.of(2024, 10, 12), true);
-
         when(recordService.editRecord(eq(email), eq(habitTitle), any())).thenReturn(null);
 
         String response = mockMvc.perform(put("/api/records/{email}/{habitTitle}", email, habitTitle)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"date\":\"2024-10-12\", \"completed\":true}"))
+                        .content("{\"date\":\"2024-10-12\", \"completed\":true}")
+                        .requestAttr("claims", userClaims))
                 .andExpect(status().isConflict())
                 .andReturn()
                 .getResponse()
@@ -168,36 +165,26 @@ public class HabitRecordControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "user@example.com", roles = "USER")
     @DisplayName("Record deleted successfully")
     void testDeleteRecordIsSuccess() throws Exception {
-        String email = "user@example.com";
-        String habitTitle = "Exercise";
-        HabitRecordDTO recordDTOToDelete = new HabitRecordDTO(
-                LocalDate.of(2024, 10, 13), true);
-
         when(recordService.deleteRecord(eq(email), eq(habitTitle), any())).thenReturn(true);
 
         mockMvc.perform(delete("/api/records/{email}/{habitTitle}", email, habitTitle)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"date\":\"2024-10-13\", \"completed\":true}"))
+                        .content("{\"date\":\"2024-10-13\", \"completed\":true}")
+                        .requestAttr("claims", userClaims))
                 .andExpect(status().isNoContent());
     }
 
     @Test
-    @WithMockUser(username = "user@example.com", roles = "USER")
     @DisplayName("Date not found, record deletion failed")
     void testDeleteRecordDateNotFound() throws Exception {
-        String email = "user@example.com";
-        String habitTitle = "Exercise";
-        HabitRecordDTO recordDTOToDelete = new HabitRecordDTO(
-                LocalDate.of(2024, 10, 14), true);
-
         when(recordService.deleteRecord(eq(email), eq(habitTitle), any())).thenReturn(false);
 
         String response = mockMvc.perform(delete("/api/records/{email}/{habitTitle}", email, habitTitle)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"date\":\"2024-10-14\", \"completed\":true}"))
+                        .content("{\"date\":\"2024-10-14\", \"completed\":true}")
+                        .requestAttr("claims", userClaims))
                 .andExpect(status().isNotFound())
                 .andReturn()
                 .getResponse()

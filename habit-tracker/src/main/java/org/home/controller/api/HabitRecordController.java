@@ -1,5 +1,7 @@
 package org.home.controller.api;
 
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.home.dto.ErrorResponseDTO;
@@ -8,7 +10,6 @@ import org.home.service.HabitRecordService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.util.Map;
+
+import static org.home.model.Role.ADMIN;
 
 /**
  * REST controller for managing habit records.
@@ -38,10 +41,17 @@ public class HabitRecordController {
      * @param habitTitle the title of the habit for which records are being retrieved
      * @return a response entity containing the user's habit records
      */
-    @PreAuthorize("#email == authentication.principal.username or hasRole('ADMIN')")
     @GetMapping(value = "/{email}/{habitTitle}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAllRecords(@PathVariable("email") String email,
-                                           @PathVariable("habitTitle") String habitTitle) {
+                                           @PathVariable("habitTitle") String habitTitle,
+                                           HttpServletRequest request) {
+        Claims claims = (Claims) request.getAttribute("claims");
+        String username = (String) claims.get("username");
+        if (username == null || (!username.equals(email) && !ADMIN.equals(claims.get("role")))) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ErrorResponseDTO("Access denied"));
+        }
+
         Map<LocalDate, HabitRecordDTO> records = recordService.getAllRecords(email, habitTitle);
         return ResponseEntity.ok()
                 .header("X-Total-Count", String.valueOf(records.size()))
@@ -56,11 +66,18 @@ public class HabitRecordController {
      * @param recordDTO  the record data to be created
      * @return a response entity containing the newly created record or a conflict error message
      */
-    @PreAuthorize("#email == authentication.principal.username or hasRole('ADMIN')")
     @PostMapping("/{email}/{habitTitle}")
     public ResponseEntity<?> createRecord(@PathVariable("email") String email,
                                           @PathVariable("habitTitle") String habitTitle,
-                                          @Valid @RequestBody HabitRecordDTO recordDTO) {
+                                          @Valid @RequestBody HabitRecordDTO recordDTO,
+                                          HttpServletRequest request) {
+        Claims claims = (Claims) request.getAttribute("claims");
+        String username = (String) claims.get("username");
+        if (username == null || (!username.equals(email) && !ADMIN.equals(claims.get("role")))) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ErrorResponseDTO("Access denied"));
+        }
+
         HabitRecordDTO newRecordDTO = recordService.createRecord(email, habitTitle, recordDTO);
         if (newRecordDTO == null) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -77,11 +94,18 @@ public class HabitRecordController {
      * @param recordDTOToUpdate    the updated record data
      * @return a response entity containing the updated record or a conflict error message
      */
-    @PreAuthorize("#email == authentication.principal.username or hasRole('ADMIN')")
     @PutMapping("/{email}/{habitTitle}")
     public ResponseEntity<?> editRecord(@PathVariable("email") String email,
                                         @PathVariable("habitTitle") String habitTitle,
-                                        @Valid @RequestBody HabitRecordDTO recordDTOToUpdate) {
+                                        @Valid @RequestBody HabitRecordDTO recordDTOToUpdate,
+                                        HttpServletRequest request) {
+        Claims claims = (Claims) request.getAttribute("claims");
+        String username = (String) claims.get("username");
+        if (username == null || (!username.equals(email) && !ADMIN.equals(claims.get("role")))) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ErrorResponseDTO("Access denied"));
+        }
+
         HabitRecordDTO updatedRecordDTO = recordService.editRecord(email, habitTitle, recordDTOToUpdate);
         if (updatedRecordDTO == null) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -98,11 +122,18 @@ public class HabitRecordController {
      * @param recordDTOToDelete    the record data to be deleted
      * @return a response entity indicating the result of the deletion operation
      */
-    @PreAuthorize("#email == authentication.principal.username or hasRole('ADMIN')")
     @DeleteMapping("/{email}/{habitTitle}")
     public ResponseEntity<?> deleteRecord(@PathVariable("email") String email,
                                           @PathVariable("habitTitle") String habitTitle,
-                                          @Valid @RequestBody HabitRecordDTO recordDTOToDelete) {
+                                          @Valid @RequestBody HabitRecordDTO recordDTOToDelete,
+                                          HttpServletRequest request) {
+        Claims claims = (Claims) request.getAttribute("claims");
+        String username = (String) claims.get("username");
+        if (username == null || (!username.equals(email) && !ADMIN.equals(claims.get("role")))) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ErrorResponseDTO("Access denied"));
+        }
+
         boolean deleteResult = recordService.deleteRecord(email, habitTitle, recordDTOToDelete);
         if (!deleteResult) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponseDTO("Record not found"));
