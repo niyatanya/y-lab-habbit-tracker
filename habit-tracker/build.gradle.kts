@@ -5,7 +5,6 @@ plugins {
     id("java")
     id("checkstyle")
     id("io.freefair.lombok") version "8.6"
-    id("io.freefair.aspectj.post-compile-weaving") version "8.6"
     id("org.springframework.boot") version "3.2.0"
     id("io.spring.dependency-management") version "1.1.6"
 }
@@ -26,7 +25,6 @@ repositories {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
-    implementation("org.springframework.boot:spring-boot-starter-aop")
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -48,6 +46,8 @@ dependencies {
 
     implementation("org.mapstruct:mapstruct:1.5.5.Final")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
+    compileOnly("org.mapstruct:mapstruct-processor:1.5.5.Final")
+
     compileOnly("org.projectlombok:lombok:1.18.34")
     annotationProcessor("org.projectlombok:lombok:1.18.34")
     annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
@@ -55,8 +55,8 @@ dependencies {
     testImplementation("org.mockito:mockito-core:5.12.0")
     testImplementation("org.mockito:mockito-junit-jupiter:5.12.0")
 
-    implementation("org.aspectj:aspectjrt:1.9.21.1")
-    implementation("org.aspectj:aspectjweaver:1.9.21.1")
+    implementation(project(":execution-time-logging-starter"))
+    implementation(project(":user-action-logging-starter"))
 
     implementation("io.jsonwebtoken:jjwt-api:0.11.5")
     implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
@@ -80,14 +80,4 @@ tasks.withType<Test> {
         showCauses = true
         showStackTraces = true
     }
-}
-
-tasks.withType<JavaCompile> {
-    options.compilerArgs.addAll(listOf(
-        "-source", "21",
-        "-target", "21",
-        "-Xlint:none"
-    ))
-    options.encoding = "UTF-8"
-    options.isFork = true
 }

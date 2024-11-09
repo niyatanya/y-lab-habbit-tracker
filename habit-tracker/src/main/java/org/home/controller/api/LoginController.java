@@ -2,7 +2,7 @@ package org.home.controller.api;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.home.annotations.LoggableUserAction;
+import org.home.logging.annotations.LoggableUserAction;
 import org.home.dto.ErrorResponseDTO;
 import org.home.dto.LoginInputDTO;
 import org.home.dto.LoginOutputDTO;

@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.home.dto.ErrorResponseDTO;
 import org.home.dto.HabitRecordDTO;
+import org.home.logging.annotations.LoggableUserAction;
 import org.home.service.HabitRecordService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -30,6 +31,7 @@ import static org.home.model.Role.ADMIN;
 @RestController
 @RequestMapping("/api/records")
 @RequiredArgsConstructor
+@LoggableUserAction
 public class HabitRecordController {
 
     private final HabitRecordService recordService;

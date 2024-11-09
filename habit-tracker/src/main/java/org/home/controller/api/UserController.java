@@ -4,7 +4,7 @@ import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.home.annotations.LoggableUserAction;
+import org.home.logging.annotations.LoggableUserAction;
 import org.home.dto.ErrorResponseDTO;
 import org.home.dto.UserCreateDTO;
 import org.home.dto.UserDTO;

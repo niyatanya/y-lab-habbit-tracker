@@ -1,9 +1,9 @@
 package org.home.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.home.annotations.LoggableUserAction;
 import org.home.dto.UserCreateDTO;
 import org.home.dto.UserDTO;
+import org.home.logging.annotations.LoggableUserAction;
 import org.home.mapper.UserMapper;
 import org.home.model.User;
 import org.home.repository.UserRepository;

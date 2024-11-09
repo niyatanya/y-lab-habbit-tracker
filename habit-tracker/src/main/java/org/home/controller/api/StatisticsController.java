@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.home.dto.ErrorResponseDTO;
 import org.home.dto.StatisticsInputDTO;
+import org.home.logging.annotations.LoggableUserAction;
 import org.home.service.StatisticsService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,6 +27,7 @@ import static org.home.model.Role.ADMIN;
 @RestController
 @RequestMapping("/api/statistics")
 @RequiredArgsConstructor
+@LoggableUserAction
 public class StatisticsController {
 
     private final StatisticsService statisticsService;

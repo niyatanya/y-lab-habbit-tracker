@@ -5,7 +5,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
-import org.home.annotations.LoggableUserAction;
+import org.home.logging.annotations.LoggableUserAction;
 import org.home.dto.HabitDTO;
 import org.home.mapper.HabitMapper;
 import org.home.model.Habit;

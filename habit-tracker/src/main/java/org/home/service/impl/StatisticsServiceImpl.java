@@ -1,7 +1,7 @@
 package org.home.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.home.annotations.LoggableUserAction;
+import org.home.logging.annotations.LoggableUserAction;
 import org.home.dto.StatisticsInputDTO;
 import org.home.model.Habit;
 import org.home.model.HabitRecord;
