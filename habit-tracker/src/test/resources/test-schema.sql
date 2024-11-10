@@ -43,3 +43,11 @@ CREATE TABLE IF NOT EXISTS ylab_schema.records (
 INSERT INTO ylab_schema.records (date, completed, habit_id) VALUES
 ('2024-10-19 00:00:00.000', true, 1),
 ('2024-10-20 00:00:00.000', true, 1);
+
+CREATE TABLE IF NOT EXISTS ylab_schema.audit_log (
+	id bigint GENERATED ALWAYS AS IDENTITY,
+	email varchar(255) NOT NULL,
+	action varchar(255) NOT NULL,
+	result varchar(255) NOT NULL,
+	timestamp timestamp NOT NULL
+);

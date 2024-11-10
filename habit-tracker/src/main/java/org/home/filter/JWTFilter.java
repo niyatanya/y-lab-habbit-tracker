@@ -6,6 +6,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.home.utils.JwtContext;
 import org.home.utils.JwtTokenUtil;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -24,6 +25,7 @@ public class JWTFilter extends OncePerRequestFilter {
             try {
                 Claims claims = JwtTokenUtil.validateToken(token);
                 request.setAttribute("claims", claims);
+                JwtContext.setClaims(claims);
             } catch (JwtException e) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
@@ -33,6 +35,10 @@ public class JWTFilter extends OncePerRequestFilter {
             return;
         }
 
-        filterChain.doFilter(request, response);
+        try {
+            filterChain.doFilter(request, response);
+        } finally {
+            JwtContext.clear();
+        }
     }
 }

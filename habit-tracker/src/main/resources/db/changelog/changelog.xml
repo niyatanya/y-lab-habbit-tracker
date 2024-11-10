@@ -15,4 +15,5 @@
         <include file="008-insert-data-records.xml" relativeToChangelogFile="true"/>
         <include file="009-add-sequences-for-ids.xml" relativeToChangelogFile="true"/>
         <include file="010-add-remarks.xml" relativeToChangelogFile="true"/>
+        <include file="011-create-user-actions-audit-log-table.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
