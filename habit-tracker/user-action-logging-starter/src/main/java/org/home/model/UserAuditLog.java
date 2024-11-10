@@ -2,6 +2,9 @@ package org.home.model;
 
 import java.sql.Timestamp;
 
+/**
+ * The {@code UserAuditLog} class represents a log record of a user action.
+ */
 public class UserAuditLog {
     private Long id;
     private String email;
@@ -9,6 +12,14 @@ public class UserAuditLog {
     private String result;
     private Timestamp timestamp;
 
+    /**
+     * Constructs a new {@code UserAuditLog} with the specified parameters.
+     *
+     * @param email         the email address of the user
+     * @param action        the action that user has performed
+     * @param result        the result of the action
+     * @param timestamp     the timestamp of the action performed
+     */
     public UserAuditLog(String email, String action, String result, Timestamp timestamp) {
         this.email = email;
         this.action = action;

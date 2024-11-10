@@ -16,7 +16,8 @@ public class AllMethodsExecutionTimeAspect {
     private static final Logger logger = LoggerFactory.getLogger(AllMethodsExecutionTimeAspect.class);
 
     /**
-     * Pointcut that matches the execution of any method in the application.
+     * Pointcut that matches the execution of any method in the application,
+     * except for the configuration and spring internal methods.
      */
     @Pointcut("execution(* org.home..* (..)) && !within(org.springframework..*) && !within(org.home.config..*)")
     public void allMethods() { }

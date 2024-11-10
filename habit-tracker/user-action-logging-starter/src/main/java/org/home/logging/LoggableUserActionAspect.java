@@ -33,8 +33,10 @@ public class LoggableUserActionAspect {
     public void annotatedByLoggableUserAction() {}
 
     /**
-     * After advice that logs a message when a user calls a method
-     * annotated with {@link org.home.logging.annotations.LoggableUserAction}.
+     * Logs a successful user action after the method execution.
+     *
+     * @param joinPoint the join point representing the method execution
+     * @param result the result returned by the method
      */
     @AfterReturning(pointcut = "annotatedByLoggableUserAction()", returning = "result")
     public void logSuccess(JoinPoint joinPoint, Object result) {
@@ -47,6 +49,12 @@ public class LoggableUserActionAspect {
         auditRepository.saveAuditLog(audit);
     }
 
+    /**
+     * Logs a failed user action when an exception is thrown during the method execution.
+     *
+     * @param joinPoint the join point representing the method execution
+     * @param exception the exception thrown by the method
+     */
     @AfterThrowing(pointcut = "annotatedByLoggableUserAction()", throwing = "exception")
     public void logSuccess(JoinPoint joinPoint, Throwable exception) {
         UserAuditLog audit = new UserAuditLog();

@@ -15,6 +15,9 @@ import java.util.List;
 
 import static org.home.model.Role.ADMIN;
 
+/**
+ * REST controller for managing user audit logs, accessible only to admins.
+ */
 @RestController
 @RequestMapping("/admin/audit-logs")
 @RequiredArgsConstructor
@@ -22,6 +25,12 @@ public class AdminAuditController {
 
     private final AuditRepository auditRepository;
 
+    /**
+     * Retrieves all user audit logs from the database.
+     * Accessible only to users with the 'ADMIN' role.
+     *
+     * @return a response entity containing a list of user audit logs.
+     */
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<UserAuditLog>> getAllAuditLogs() {
         Claims claims = JwtContext.getClaims();
