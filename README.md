@@ -8,14 +8,14 @@ docker compose build
 docker compose up
 ```
 
-## Install app
-```
-./gradlew installDist
-```
-
 ## Run app
 ```
-./build/install/habit-tracker/bin/habit-tracker
+./gradlew :bootRun
+```
+
+## API documentation
+```
+http://localhost:8080/swagger-ui.html
 ```
 
 ## Выполненные домашние задания
@@ -24,3 +24,4 @@ docker compose up
 - [ДЗ2](https://github.com/niyatanya/y-lab-habbit-tracker/pull/2)
 - [ДЗ3](https://github.com/niyatanya/y-lab-habbit-tracker/pull/3)
 - [ДЗ4](https://github.com/niyatanya/y-lab-habbit-tracker/pull/4)
+- [ДЗ5](https://github.com/niyatanya/y-lab-habbit-tracker/pull/5)

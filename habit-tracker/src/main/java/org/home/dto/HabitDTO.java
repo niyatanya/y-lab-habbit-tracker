@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.home.model.Frequency;
 
+import java.util.Objects;
+
 /**
  * Data Transfer Object (DTO) for a habit.
  */
@@ -25,4 +27,23 @@ public class HabitDTO {
 
     @NotNull
     private Frequency frequency;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        HabitDTO habitDTO = (HabitDTO) o;
+        return Objects.equals(title, habitDTO.title)
+                && Objects.equals(description, habitDTO.description)
+                && frequency == habitDTO.frequency;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(title, description, frequency);
+    }
 }

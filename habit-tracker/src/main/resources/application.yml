@@ -1,4 +1,9 @@
+server:
+  port: 8080
+
 spring:
+  application:
+    name: HabitTracker
   datasource:
     url: jdbc:postgresql://localhost:5432/habittrackerdb
     username: habittrackeruser
@@ -6,3 +11,6 @@ spring:
   liquibase:
     enabled: true
     change-log: classpath:db/changelog/changelog.xml
+  jackson:
+    serialization:
+      indent_output: true

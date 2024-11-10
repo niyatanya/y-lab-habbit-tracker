@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd"
+        logicalFilePath="db/changelog.xml">
+
+    <changeSet id="011-create-user-actions-audit-log-table" author="tanya">
+
+        <createTable tableName="audit_log" schemaName="ylab_schema">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="action" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="result" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="timestamp" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createSequence schemaName="ylab_schema" sequenceName="audit_log_id_seq"
+                        dataType="int" incrementBy="1" startValue="1"/>
+
+        <addDefaultValue schemaName="ylab_schema" tableName="audit_log" columnName="id"
+                         defaultValueSequenceNext="audit_log_id_seq"/>
+
+        <sql dbms="postgresql">
+            COMMENT ON TABLE ylab_schema.audit_log IS 'Таблица логгирования действий пользователей';
+            COMMENT ON COLUMN ylab_schema.audit_log.id IS 'Идентификатор действия';
+            COMMENT ON COLUMN ylab_schema.audit_log.email IS 'Эл. почта пользователя';
+            COMMENT ON COLUMN ylab_schema.audit_log.action IS 'Наименование выполненного метода';
+            COMMENT ON COLUMN ylab_schema.audit_log.result IS 'Результат выполнения метода: SUCCESS или ERROR';
+            COMMENT ON COLUMN ylab_schema.audit_log.timestamp IS 'Время завершения работы метода';
+        </sql>
+
+    </changeSet>
+</databaseChangeLog>

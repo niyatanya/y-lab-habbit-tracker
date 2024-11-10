@@ -1,4 +1,4 @@
-package org.home.repository;
+package org.home.repository.jdbc;
 
 public final class SqlQueries {
 
@@ -24,6 +24,11 @@ public final class SqlQueries {
     public static final String SELECT_RECORD = "SELECT * FROM ylab_schema.records WHERE habit_id = ? AND date = ?";
     public static final String UPDATE_RECORD = "UPDATE ylab_schema.records SET completed = ? WHERE id = ?";
     public static final String DELETE_RECORD = "DELETE FROM ylab_schema.records WHERE id = ?";
+
+    public static final String INSERT_AUDIT_LOG =
+            "INSERT INTO ylab_schema.audit_log (email, action, result, timestamp) VALUES (?, ?, ?, ?)";
+    public static final String SELECT_ALL_AUDIT_LOGS =
+            "SELECT email, action, result, timestamp FROM ylab_schema.audit_log ORDER BY timestamp DESC";
 
     private SqlQueries() {
     }

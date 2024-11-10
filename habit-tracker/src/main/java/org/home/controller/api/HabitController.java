@@ -1,13 +1,16 @@
 package org.home.controller.api;
 
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.home.dto.ErrorResponseDTO;
 import org.home.dto.HabitDTO;
+import org.home.logging.annotations.LoggableUserAction;
 import org.home.service.HabitService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,12 +22,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
+import static org.home.model.Role.ADMIN;
+
 /**
  * REST controller for managing user habits.
  */
 @RestController
 @RequestMapping("/api/habits")
 @RequiredArgsConstructor
+@LoggableUserAction
 public class HabitController {
 
     private final HabitService habitService;
@@ -35,9 +41,15 @@ public class HabitController {
      * @param email the email of the user whose habits are to be retrieved
      * @return a response entity containing the user's habits
      */
-    @PreAuthorize("#email == authentication.principal.username or hasRole('ADMIN')")
     @GetMapping(value = "/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getAllHabits(@PathVariable("email") String email) {
+    public ResponseEntity<?> getAllHabits(@PathVariable("email") String email, HttpServletRequest request) {
+        Claims claims = (Claims) request.getAttribute("claims");
+        String username = (String) claims.get("username");
+        if (username == null || (!username.equals(email) && !ADMIN.equals(claims.get("role")))) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ErrorResponseDTO("Access denied"));
+        }
+
         Map<String, HabitDTO> habits = habitService.getAllHabits(email);
         return ResponseEntity.ok()
                 .header("X-Total-Count", String.valueOf(habits.size()))
@@ -51,13 +63,21 @@ public class HabitController {
      * @param habitDTO the habit data to be created
      * @return a response entity containing the newly created habit or a conflict error message
      */
-    @PreAuthorize("#email == authentication.principal.username or hasRole('ADMIN')")
     @PostMapping(value = "/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> createHabit(@PathVariable("email") String email, @Valid @RequestBody HabitDTO habitDTO) {
+    public ResponseEntity<?> createHabit(@PathVariable("email") String email,
+                                         @Valid @RequestBody HabitDTO habitDTO,
+                                         HttpServletRequest request) {
+        Claims claims = (Claims) request.getAttribute("claims");
+        String username = (String) claims.get("username");
+        if (username == null || (!username.equals(email) && !ADMIN.equals(claims.get("role")))) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ErrorResponseDTO("Access denied"));
+        }
+
         HabitDTO newHabitDTO = habitService.createHabit(email, habitDTO);
         if (newHabitDTO == null) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(Map.of("error", "Habit with this title already exists"));
+                    .body(new ErrorResponseDTO("Habit with this title already exists"));
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(newHabitDTO);
     }
@@ -70,14 +90,22 @@ public class HabitController {
      * @param habitDTOToUpdate     the updated habit data
      * @return a response entity containing the updated habit or a conflict error message
      */
-    @PreAuthorize("#email == authentication.principal.username or hasRole('ADMIN')")
     @PutMapping(value = "/{email}/{title}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> editHabit(@PathVariable("email") String email, @PathVariable("title") String title,
-                                       @Valid @RequestBody HabitDTO habitDTOToUpdate) {
+    public ResponseEntity<?> editHabit(@PathVariable("email") String email,
+                                       @PathVariable("title") String title,
+                                       @Valid @RequestBody HabitDTO habitDTOToUpdate,
+                                       HttpServletRequest request) {
+        Claims claims = (Claims) request.getAttribute("claims");
+        String username = (String) claims.get("username");
+        if (username == null || (!username.equals(email) && !ADMIN.equals(claims.get("role")))) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ErrorResponseDTO("Access denied"));
+        }
+
         HabitDTO updatedHabitDTO = habitService.editHabit(email, title, habitDTOToUpdate);
         if (updatedHabitDTO == null) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(Map.of("error", "Habit with this title already exists"));
+                    .body(new ErrorResponseDTO("Habit with this title already exists"));
         }
         return ResponseEntity.ok(updatedHabitDTO);
     }
@@ -89,13 +117,21 @@ public class HabitController {
      * @param title the title of the habit to be deleted
      * @return a response entity indicating the result of the deletion operation
      */
-    @PreAuthorize("#email == authentication.principal.username or hasRole('ADMIN')")
     @DeleteMapping(value = "/{email}/{title}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> deleteHabit(@PathVariable("email") String email, @PathVariable("title") String title) {
+    public ResponseEntity<?> deleteHabit(@PathVariable("email") String email,
+                                         @PathVariable("title") String title,
+                                         HttpServletRequest request) {
+        Claims claims = (Claims) request.getAttribute("claims");
+        String username = (String) claims.get("username");
+        if (username == null || (!username.equals(email) && !ADMIN.equals(claims.get("role")))) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ErrorResponseDTO("Access denied"));
+        }
+
         boolean deleteResult = habitService.deleteHabit(email, title);
         if (!deleteResult) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", "Habit not found"));
+                    .body(new ErrorResponseDTO("Habit not found"));
         }
         return ResponseEntity.noContent().build();
     }

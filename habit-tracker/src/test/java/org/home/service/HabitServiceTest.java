@@ -1,60 +1,63 @@
 package org.home.service;
 
 import org.home.dto.HabitDTO;
-import org.home.mapper.HabitMapper;
-import org.home.mapper.UserMapper;
 import org.home.model.Frequency;
 import org.home.model.User;
 import org.home.repository.HabitRepository;
 import org.home.repository.UserRepository;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.autoconfigure.data.jdbc.JdbcRepositoriesAutoConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
-
-import javax.sql.DataSource;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@SpringBootTest
+@Testcontainers
+@ActiveProfiles("test")
+@ImportAutoConfiguration(exclude = JdbcRepositoriesAutoConfiguration.class)
 @DisplayName("HabitService test")
 class HabitServiceTest {
 
+    @Container
     private static PostgreSQLContainer<?> testDb = new PostgreSQLContainer<>("postgres")
+            .withDatabaseName("test-db")
+            .withUsername("test-db-username")
+            .withPassword("test-db-pass")
             .withInitScript("test-schema.sql");
 
-    private static final UserMapper USER_MAPPER = Mappers.getMapper(UserMapper.class);
-    private static final HabitMapper HABIT_MAPPER = Mappers.getMapper(HabitMapper.class);
+    @Autowired
+    private UserRepository userRepository;
 
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private HabitRepository habitRepository;
+
+    @Autowired
     private HabitService habitService;
+
     private User user;
 
-    @BeforeAll
-    static void beforeAll() {
-        testDb.start();
-    }
-
-    @AfterAll
-    static void afterAll() {
-        testDb.stop();
+    @DynamicPropertySource
+    static void setDatasourceProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", testDb::getJdbcUrl);
+        registry.add("spring.datasource.username", testDb::getUsername);
+        registry.add("spring.datasource.password", testDb::getPassword);
     }
 
     @BeforeEach
     void setUp() {
-        DataSource dataSource = new DriverManagerDataSource(
-                testDb.getJdbcUrl(),
-                testDb.getUsername(),
-                testDb.getPassword()
-        );
-        UserRepository userRepository = new UserRepository(dataSource);
-        HabitRepository habitRepository = new HabitRepository(dataSource);
-
-        UserService userService = new UserService(USER_MAPPER, userRepository);
-        habitService = new HabitService(HABIT_MAPPER, userRepository, habitRepository);
-
         user = userService.findUserByEmail("tu@example.com");
     }
 

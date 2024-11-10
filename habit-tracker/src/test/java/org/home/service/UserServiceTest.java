@@ -1,55 +1,49 @@
 package org.home.service;
 
-import lombok.RequiredArgsConstructor;
 import org.home.dto.UserCreateDTO;
 import org.home.dto.UserDTO;
-import org.home.mapper.UserMapper;
 import org.home.model.User;
 import org.home.repository.UserRepository;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.autoconfigure.data.jdbc.JdbcRepositoriesAutoConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
-
-import javax.sql.DataSource;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@SpringBootTest
+@Testcontainers
+@ActiveProfiles("test")
+@ImportAutoConfiguration(exclude = JdbcRepositoriesAutoConfiguration.class)
 @DisplayName("UserService test")
-@RequiredArgsConstructor
 class UserServiceTest {
 
+    @Container
     private static PostgreSQLContainer<?> testDb = new PostgreSQLContainer<>("postgres")
-        .withInitScript("test-schema.sql");
+            .withDatabaseName("test-db")
+            .withUsername("test-db-username")
+            .withPassword("test-db-pass")
+            .withInitScript("test-schema.sql");
 
+    @Autowired
     private UserService userService;
+
+    @Autowired
     private UserRepository userRepository;
 
-    private static final UserMapper MAPPER = Mappers.getMapper(UserMapper.class);
-
-    @BeforeAll
-    static void beforeAll() {
-        testDb.start();
-    }
-
-    @AfterAll
-    static void afterAll() {
-        testDb.stop();
-    }
-
-    @BeforeEach
-    void setUp() {
-        DataSource dataSource = new DriverManagerDataSource(
-                testDb.getJdbcUrl(),
-                testDb.getUsername(),
-                testDb.getPassword()
-        );
-        userRepository = new UserRepository(dataSource);
-        userService = new UserService(MAPPER, userRepository);
+    @DynamicPropertySource
+    static void setDatasourceProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", testDb::getJdbcUrl);
+        registry.add("spring.datasource.username", testDb::getUsername);
+        registry.add("spring.datasource.password", testDb::getPassword);
     }
 
     @Test

@@ -1,70 +1,69 @@
 package org.home.service;
 
 import org.home.dto.HabitRecordDTO;
-import org.home.mapper.HabitMapper;
-import org.home.mapper.HabitRecordMapper;
-import org.home.mapper.UserMapper;
 import org.home.model.Habit;
 import org.home.model.HabitRecord;
 import org.home.model.User;
 import org.home.repository.HabitRecordRepository;
 import org.home.repository.HabitRepository;
-import org.home.repository.UserRepository;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.autoconfigure.data.jdbc.JdbcRepositoriesAutoConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
-import javax.sql.DataSource;
 import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@SpringBootTest
+@Testcontainers
+@ActiveProfiles("test")
+@ImportAutoConfiguration(exclude = JdbcRepositoriesAutoConfiguration.class)
 @DisplayName("HabitRecordService test")
 public class HabitRecordServiceTest {
 
+    @Container
     private static PostgreSQLContainer<?> testDb = new PostgreSQLContainer<>("postgres")
+            .withDatabaseName("test-db")
+            .withUsername("test-db-username")
+            .withPassword("test-db-pass")
             .withInitScript("test-schema.sql");
 
-    private static final UserMapper USER_MAPPER = Mappers.getMapper(UserMapper.class);
-    private static final HabitMapper HABIT_MAPPER = Mappers.getMapper(HabitMapper.class);
-    private static final HabitRecordMapper RECORD_MAPPER = Mappers.getMapper(HabitRecordMapper.class);
+    @Autowired
+    private HabitRepository habitRepository;
 
+    @Autowired
+    private UserService userService;
+
+    @Autowired
     private HabitRecordService recordService;
+
+    @Autowired
+    private HabitRecordRepository recordRepository;
+
     private User user;
     private Habit habit;
 
-    @BeforeAll
-    static void beforeAll() {
-        testDb.start();
-    }
-
-    @AfterAll
-    static void afterAll() {
-        testDb.stop();
+    @DynamicPropertySource
+    static void setDatasourceProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", testDb::getJdbcUrl);
+        registry.add("spring.datasource.username", testDb::getUsername);
+        registry.add("spring.datasource.password", testDb::getPassword);
     }
 
     @BeforeEach
     void setUp() {
-        DataSource dataSource = new DriverManagerDataSource(
-                testDb.getJdbcUrl(),
-                testDb.getUsername(),
-                testDb.getPassword()
-        );
-        UserRepository userRepository = new UserRepository(dataSource);
-        HabitRepository habitRepository = new HabitRepository(dataSource);
-        HabitRecordRepository recordRepository = new HabitRecordRepository(dataSource);
-
-        UserService userService = new UserService(USER_MAPPER, userRepository);
-        HabitService habitService = new HabitService(HABIT_MAPPER, userRepository, habitRepository);
-        recordService = new HabitRecordService(RECORD_MAPPER, userRepository, habitRepository, recordRepository);
-
         user = userService.findUserByEmail("tu@example.com");
-        habit = habitService.findByTitleAndUserId(user, "Go to shower");
+        habit = habitRepository.findByTitleAndUserId("Go to shower", user.getId()).orElseThrow();
     }
 
     @Test
@@ -95,7 +94,7 @@ public class HabitRecordServiceTest {
         HabitRecordDTO newRecordDTO = new HabitRecordDTO(date, newCompleted);
         recordService.editRecord(user.getEmail(), habit.getTitle(), newRecordDTO);
 
-        HabitRecord editedRecord = recordService.findByDateAndHabitId(habit, date);
+        HabitRecord editedRecord = recordRepository.findByDateAndHabitId(date, habit.getId()).orElseThrow();
 
         assertThat(editedRecord).isNotNull();
         assertThat(editedRecord.isCompleted()).isEqualTo(newCompleted);
