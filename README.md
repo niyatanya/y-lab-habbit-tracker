@@ -10,7 +10,12 @@ docker compose up
 
 ## Run app
 ```
-./gradlew bootRun
+./gradlew :bootRun
+```
+
+## API documentation
+```
+http://localhost:8080/swagger-ui.html
 ```
 
 ## Выполненные домашние задания

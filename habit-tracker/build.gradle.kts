@@ -45,6 +45,8 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
     implementation("jakarta.validation:jakarta.validation-api:3.1.0")
 
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
+
     //Submodules
     implementation(project(":execution-time-logging-starter"))
     implementation(project(":user-action-logging-starter"))
